@@ -250,11 +250,12 @@ function wybierz(id,k){const m=st.m;
    Każda wiadomość zawiera cały dotychczasowy zapis, więc zgubiona wiadomość naprawia się przy następnej.
    W jednym „głosowaniu” (STAT.cykl godzin) liczy się pierwsza odpowiedź na każdą decyzję; powtórne przejście gry nie jest wysyłane.
    Gdy wysyłka zawiedzie, gra działa dalej bez zmian. Wyniki pokazuje strona wyniki/ (src/wyniki.tpl.html).
-   Serwis ntfy.sh ogranicza liczbę żądań z jednego adresu, dlatego po odmowie serwera telefon nie ponawia w kółko: po trzech odmowach przestaje. */
+   Serwis ntfy.sh ogranicza liczbę żądań z jednego adresu, dlatego telefon nie ponawia w kółko:
+   po trzech odmowach serwera albo dwunastu nieudanych połączeniach przestaje (do ponownego otwarcia strony albo powrotu sieci). */
 const stat=(()=>{
   if(!STAT||typeof fetch!=='function')return {zglos(){},pchnij(){},stan:()=>null};
   const KL='nnm-stat',temat=STAT.temat+'-'+(KANAL||'a'),IDS=['d1','d2','d3','d4','d5'];
-  let s=null,wLocie=false,proby=0,odmowy=0,pauza=0,zegar=null;
+  let s=null,wLocie=false,proby=0,odmowy=0,bledy=0,pauza=0,zegar=null;
   const teraz=()=>Math.floor(Date.now()/1000);
   const pusty=()=>({m:null,w:{},f:null,e:null});
   function czytaj(){try{const x=JSON.parse(magazyn().getItem(KL)||'null');if(x&&/^[a-z0-9]{6,16}$/.test(x.pid)&&x.r&&x.r.w)return x}catch(e){}return null}
@@ -267,15 +268,17 @@ const stat=(()=>{
       l.push(w);localStorage.setItem('nnm-mock:'+temat,JSON.stringify(l));
       try{const bc=new BroadcastChannel('nnm-mock');bc.postMessage(w);bc.close()}catch(e){}
       return Promise.resolve()}
-    return fetch(STAT.url+temat,{method:'POST',body:tresc,keepalive:true}).then(r=>{if(!r.ok){const e=new Error('HTTP '+r.status);e.odmowa=true;throw e}})}
+    // keepalive: wysyłka kończy się także wtedy, gdy ktoś od razu zablokuje telefon; przy ponowieniu już bez tej opcji
+    return fetch(STAT.url+temat,{method:'POST',body:tresc,keepalive:!proby}).then(r=>{if(!r.ok){const e=new Error('HTTP '+r.status);e.odmowa=true;throw e}})}
   function plan(ms){clearTimeout(zegar);zegar=setTimeout(pchnij,ms)}
-  function pchnij(){const x=stan();if(wLocie||x.ok>=x.n||odmowy>=3||Date.now()<pauza)return;wLocie=true;const c=x.c,n=x.n;let p;
+  const dosc=()=>odmowy>=3||bledy>=12;
+  function pchnij(){const x=stan();if(wLocie||x.ok>=x.n||dosc()||Date.now()<pauza)return;wLocie=true;const c=x.c,n=x.n;let p;
     try{p=nadaj(JSON.stringify({t:'nnm',v:1,pid:x.pid,c,n,m:x.r.m,w:x.r.w,f:x.r.f,e:x.r.e}))}catch(e){p=Promise.reject(e)}
-    const koniec=()=>{wLocie=false;if(x.ok>=x.n||odmowy>=3)return;
+    const koniec=()=>{wLocie=false;if(x.ok>=x.n||dosc())return;
       if(Date.now()<pauza)plan(pauza-Date.now()+500);                      // po odmowie serwera: jedna próba po przerwie
-      else if(proby&&proby<6)plan(Math.min(60000,3000*Math.pow(2,proby-1))); // brak sieci: 3, 6, 12, 24, 48 s
+      else if(proby&&proby<4)plan(3000*Math.pow(2,proby-1));               // brak sieci: po 3, 6 i 12 s, potem przy następnym ruchu gracza
       else if(!proby)plan(0)};                                              // w trakcie wysyłki doszła nowa odpowiedź
-    p.then(()=>{proby=0;odmowy=0;if(x.c===c&&x.ok<n){x.ok=n;pisz()}},e=>{if(e&&e.odmowa){odmowy++;pauza=Date.now()+30000}else proby++}).then(koniec,koniec)}
+    p.then(()=>{proby=0;odmowy=0;bledy=0;if(x.c===c&&x.ok<n){x.ok=n;pisz()}},e=>{if(e&&e.odmowa){odmowy++;pauza=Date.now()+30000}else{proby++;bledy++}}).then(koniec,koniec)}
   function zglos(){try{const x=stan();
     if(!st.m)return;                                                             // przed wyborem miejsca pracy nie ma czego wysyłać
     if(!x.c||teraz()-x.c>STAT.cykl*3600){x.c=teraz();x.n=0;x.ok=0;x.r=pusty()}   // nowe „głosowanie”
@@ -286,7 +289,7 @@ const stat=(()=>{
       if(id==='d5')x.r.e={p:st.z>=0?1:0,s:st.pismo?1:0}}}                        // p: Kuba pisze do ciebie; s: urzędowe pismo na biurku
     if(zm){x.n++;proby=0;pisz()}
     pchnij()}catch(e){}}
-  try{addEventListener('online',()=>{proby=0;pchnij()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){proby=0;pchnij()}})}catch(e){}
+  try{addEventListener('online',()=>{proby=0;bledy=0;pchnij()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){proby=0;pchnij()}})}catch(e){}
   return {zglos,pchnij,stan}})();
 function rysuj(fokus){const e=st.e;let h;
   if(e==='start')h=eStart();else if(e==='sr')h=eSroda();else if(e==='ep')h=eEpilog();
