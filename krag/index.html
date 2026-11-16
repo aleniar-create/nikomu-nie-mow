@@ -1,0 +1,487 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#fbfaf7">
+<title>Krąg</title>
+<style>
+:root{
+  --bg:#fbfaf7; --card:#ffffff; --ink:#16181d; --ink2:#52514e; --muted:#898781; --line:#e1e0d9;
+  --acc:#2a78d6; --sel:#16181d; --ok:#006300; --err:#b3261e; --evbg:#f3f6fb;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:max(14px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom));font-size:18px;line-height:1.45;max-width:640px;margin:0 auto}
+header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+header .name{font-weight:650;font-size:17px}
+header .st{margin-left:auto;font-size:14px;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;background:var(--muted);display:inline-block}
+.dot.ok{background:#0ca30c}.dot.err{background:#d03b3b}
+h1{font-size:26px;line-height:1.2;margin:10px 0 12px}
+h2{font-size:20px;line-height:1.25;margin:20px 0 8px}
+p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.lead{font-size:20px}
+.muted{color:var(--ink2)}
+.small{font-size:15px;color:var(--ink2)}
+.tag{display:inline-block;font-size:13px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.opts{display:grid;gap:10px;margin-top:10px}
+.opts.row{grid-template-columns:repeat(3,1fr)}
+.opts.two{grid-template-columns:repeat(2,1fr)}
+.opts.four{grid-template-columns:repeat(4,1fr)}
+button{font:inherit;color:inherit;cursor:pointer}
+button.opt{font-size:19px;font-weight:600;padding:16px 10px;border-radius:14px;border:2px solid var(--line);background:var(--card);text-align:center;line-height:1.25}
+button.opt.left{text-align:left}
+button.opt.on{border-color:var(--sel);background:var(--sel);color:#fff}
+button.go{font-size:20px;font-weight:650;width:100%;padding:16px;border:0;border-radius:14px;background:var(--acc);color:#fff;margin-top:14px}
+button.go:disabled{opacity:.4}
+button.link{background:none;border:0;padding:0;color:var(--acc);text-decoration:underline;font-size:15px}
+.done{color:var(--ok);font-weight:600;margin-top:10px;min-height:1.4em}
+.done.err{color:var(--err)}
+.q{font-size:19px;font-weight:600;line-height:1.35}
+.val{font-size:32px;font-weight:700;margin:6px 0 0}
+input[type=range]{width:100%;height:44px;accent-color:var(--acc)}
+textarea{width:100%;min-height:120px;font:inherit;font-size:18px;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink)}
+.scale{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-top:8px}
+.scale button{font-size:21px;font-weight:650;padding:12px 0;border-radius:12px;border:2px solid var(--line);background:#fff}
+.scale button.on{background:var(--sel);color:#fff;border-color:var(--sel)}
+.anchors{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);margin-top:4px}
+.item{margin:18px 0}
+.ev{border-left:4px solid var(--acc);padding:10px 12px;margin:10px 0;background:var(--evbg);border-radius:8px}
+.ev b{display:block;margin-bottom:4px}
+.src{font-size:13px;color:var(--ink2);margin-top:6px}
+.rules{padding-left:22px;margin:8px 0}.rules li{margin:6px 0}
+ol.script{padding-left:22px}ol.script li{margin:10px 0}
+.tel{font-size:24px;font-weight:700;text-decoration:none;color:var(--ink)}
+.contact{padding:12px 0;border-bottom:1px solid var(--line)}.contact:last-child{border-bottom:0}
+.contact .who{font-weight:650}
+footer{margin-top:28px;font-size:14px;color:var(--ink2)}
+.steps{display:grid;gap:8px;margin-top:10px}
+.steps button{font-size:16px;padding:12px;border-radius:10px;border:1px solid var(--line);background:#fff;text-align:left}
+.hidden{display:none!important}
+.ring{flex:none}
+</style>
+</head>
+<body>
+<header>
+  <svg class="ring" width="30" height="30" viewBox="0 0 30 30" aria-hidden="true" id="logo"></svg>
+  <span class="name">Krąg</span>
+  <span class="st"><span class="dot" id="dot"></span><span id="stText">łączę…</span></span>
+</header>
+
+<main id="main"></main>
+
+<footer id="foot">
+  <button class="link" id="manualBtn">Ekran się nie zmienia? Wybierz go ręcznie</button>
+  <div id="manual" class="hidden">
+    <p class="small">Wybierz krok, o którym mówi prowadzący:</p>
+    <div class="steps" id="manualList"></div>
+  </div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------- logo: krąg krzeseł ----------
+  (function () {
+    var svg = document.getElementById('logo'), s = '';
+    for (var i = 0; i < 10; i++) {
+      var a = i / 10 * Math.PI * 2 - Math.PI / 2;
+      s += '<circle cx="' + (15 + 11 * Math.cos(a)).toFixed(2) + '" cy="' + (15 + 11 * Math.sin(a)).toFixed(2) + '" r="2.6" fill="#16181d"/>';
+    }
+    svg.innerHTML = s;
+  })();
+
+  // ---------- konfiguracja ----------
+  var P = new URLSearchParams(location.search);
+  var CODE = (P.get('s') || '').toLowerCase();
+  var MOCK = P.get('mock') === '1';
+  var main = document.getElementById('main');
+
+  if (!/^[a-z0-9]{6,20}$/.test(CODE)) {
+    main.innerHTML = '<h1>Brak kodu kręgu</h1><p class="lead">Zeskanuj kod QR z ekranu prowadzącego.</p>';
+    document.getElementById('foot').classList.add('hidden');
+    document.getElementById('stText').textContent = '';
+    return;
+  }
+
+  var TOPIC_CTRL = 'krag-' + CODE + '-c';
+  var TOPIC_ANS = 'krag-' + CODE + '-a';
+
+  // ---------- pamięć lokalna (bezpieczna) ----------
+  // w trybie próbnym każda karta przeglądarki udaje osobny telefon
+  function store() { return MOCK ? window.sessionStorage : window.localStorage; }
+  function lsGet(k) { try { return store().getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { store().setItem(k, v); } catch (e) {} }
+  var pid = lsGet('krag-pid');
+  if (!pid) { pid = Math.random().toString(36).slice(2, 12); lsSet('krag-pid', pid); }
+  var S = {};
+  try { S = JSON.parse(lsGet('krag-state-' + CODE) || '{}') || {}; } catch (e) { S = {}; }
+  function save() { lsSet('krag-state-' + CODE, JSON.stringify(S)); }
+
+  // ---------- transport: ntfy.sh albo tryb próbny (ta sama przeglądarka) ----------
+  var NTFY = 'https://ntfy.sh/';
+  var bc = null;
+  if (MOCK && 'BroadcastChannel' in window) bc = new BroadcastChannel('krag-mock');
+  var mockSubs = [];
+
+  function publish(topic, obj) {
+    if (MOCK) {
+      var msg = { id: Math.random().toString(36).slice(2), time: Math.floor(Date.now() / 1000), event: 'message', topic: topic, message: JSON.stringify(obj) };
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem('krag-mock:' + topic) || '[]'); } catch (e) {}
+      list.push(msg);
+      try { localStorage.setItem('krag-mock:' + topic, JSON.stringify(list)); } catch (e) {}
+      if (bc) bc.postMessage(msg);
+      mockSubs.forEach(function (s) { if (s.topic === topic) s.handle(msg); });
+      return Promise.resolve(true);
+    }
+    return fetch(NTFY + topic, { method: 'POST', body: JSON.stringify(obj) })
+      .then(function (r) { if (!r.ok) throw new Error('HTTP ' + r.status); return true; });
+  }
+
+  function subscribe(topic, onData, onState) {
+    var seen = {};
+    function handle(m) {
+      if (!m || m.event !== 'message' || seen[m.id]) return;
+      seen[m.id] = 1;
+      var d; try { d = JSON.parse(m.message); } catch (e) { return; }
+      onData(d, m);
+    }
+    if (MOCK) {
+      var list = [];
+      try { list = JSON.parse(localStorage.getItem('krag-mock:' + topic) || '[]'); } catch (e) {}
+      list.forEach(handle);
+      mockSubs.push({ topic: topic, handle: handle });
+      if (bc) bc.addEventListener('message', function (e) { if (e.data && e.data.topic === topic) handle(e.data); });
+      onState('ok');
+      return;
+    }
+    onState('conn');
+    var es = new EventSource(NTFY + topic + '/sse?since=all');
+    es.onopen = function () { onState('ok'); };
+    es.onmessage = function (e) { try { handle(JSON.parse(e.data)); } catch (_) {} };
+    es.onerror = function () { onState(es.readyState === 2 ? 'err' : 'conn'); };
+  }
+
+  var dot = document.getElementById('dot'), stText = document.getElementById('stText');
+  function setConn(s) {
+    dot.className = 'dot' + (s === 'ok' ? ' ok' : s === 'err' ? ' err' : '');
+    stText.textContent = s === 'ok' ? (MOCK ? 'tryb próbny' : 'połączono') : s === 'err' ? 'brak połączenia' : 'łączę…';
+  }
+
+  function send(q, v) {
+    return publish(TOPIC_ANS, { t: 'ans', pid: pid, q: q, v: v, ts: Date.now() });
+  }
+
+  // ---------- treść ----------
+  var TOPIC_TXT = 'Coś, z czym trudno mi skończyć (np. telefon, słodycze, odkładanie spraw na później)';
+  var THREE_Q = [
+    'Z czym trudno mi skończyć — i kiedy to zauważyłem/am?',
+    'Co mi to daje, a co zabiera?',
+    'Co mi kiedyś pomogło, choćby na chwilę?'
+  ];
+
+  var CRISES = {
+    k1: { t: 'Dobra rada', d: 'Jedna osoba komentuje każdą wypowiedź i mówi innym, co mają zrobić. Nowe osoby przestają się odzywać.' },
+    k2: { t: 'Lider', d: 'Założyciel prowadzi grupę od pięciu lat i o wszystkim decyduje sam. Kto się z nim nie zgadza, przestaje być mile widziany.' },
+    k3: { t: 'Pieniądze z zewnątrz', d: 'Producent napojów energetycznych proponuje, że przez rok zapłaci za salę — w zamian za swoje logo na drzwiach.' },
+    k4: { t: 'Polityka', d: 'Przed debatą o legalizacji marihuany część grupy chce, żeby grupa publicznie poparła jedną ze stron. Zaczynają się kłótnie.' },
+    k5: { t: 'Plotka', d: 'Ktoś opowiada znajomym, kogo widział na mityngu.' },
+    k6: { t: 'Kto może przyjść?', d: 'Na mityng przychodzi 17-latek, który „tylko” pali marihuanę w weekendy. Część grupy uważa, że to nie miejsce dla niego.' },
+    k7: { t: 'Milczący', d: 'Ktoś przychodzi od roku, zawsze siedzi cicho i nigdy nic nie mówi. Czy grupa powinna coś z tym zrobić?' }
+  };
+  var TEAM_CARD = { 1: 'k1', 2: 'k2', 3: 'k3', 4: 'k4' };
+  var SPARE = ['k5', 'k6', 'k7'];
+
+  var MOTION = 'Szesnastolatek, który chodzi na mityngi, powinien mówić o sobie: „jestem uzależniony”.';
+  var EVIDENCE = {
+    za: [
+      { t: 'Przynależność od pierwszego dnia', d: 'Nawet SMART Recovery, które unika etykiet, przyznaje, że w programach 12 kroków nazwanie siebie „alkoholikiem” czy „uzależnionym” daje wielu osobom natychmiastowe poczucie przynależności.', s: 'SMART Recovery, „The words we use” (blog)' },
+      { t: 'Nowa tożsamość przez grupę', d: 'Model SIMOR: zdrowienie to przejście do nowej tożsamości społecznej — przez zmianę sieci kontaktów i przynależność do grupy, w której trzeźwość jest normą.', s: 'Best i in. (2016), Addiction Research & Theory' },
+      { t: 'Uniwersalność', d: 'Czynnik leczący grupy według Yaloma: ulga, że nie jestem jedyny z tym problemem. Wspólna nazwa ułatwia rozpoznanie siebie w historiach innych.', s: 'Yalom, Leszcz (2006)' }
+    ],
+    przeciw: [
+      { t: 'Etykieta może odebrać motywację', d: 'SMART Recovery celowo zniechęca do etykiet „uzależniony” i „alkoholik”, bo — jak podaje — u wielu osób osłabiają one motywację do zmiany.', s: 'SMART Recovery, „Why SMART Recovery?” (ulotka)' },
+      { t: 'Tożsamość dopiero się buduje', d: 'Budowanie tożsamości to centralne zadanie rozwojowe adolescencji. Trwała, stygmatyzująca etykieta w wieku 16 lat może zawęzić to, kim młody człowiek pozwala sobie być.', s: 'Erikson (1968)' },
+      { t: 'Młodzi szukają wsparcia, nie programu', d: 'Nastolatki najbardziej cenią w AA i NA ogólne wsparcie grupy, a część odchodzi z poczuciem, że do niej nie pasuje.', s: 'Kelly, Myers, Rodolico (2008), Substance Abuse' }
+    ]
+  };
+
+  // ---------- pomocnicze ----------
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function h(html) { main.innerHTML = html; }
+  function $(sel) { return main.querySelector(sel); }
+  function $$(sel) { return Array.prototype.slice.call(main.querySelectorAll(sel)); }
+  function status(el, p) {
+    el.textContent = 'wysyłam…'; el.className = 'done';
+    p.then(function () { el.textContent = 'Wysłane ✓ Możesz zmienić odpowiedź.'; el.className = 'done'; })
+     .catch(function () { el.textContent = 'Nie udało się wysłać. Spróbuj jeszcze raz.'; el.className = 'done err'; });
+  }
+  function choiceGroup(sel, current, onPick) {
+    $$(sel).forEach(function (b) {
+      if (b.getAttribute('data-v') === String(current)) b.classList.add('on');
+      b.addEventListener('click', function () {
+        $$(sel).forEach(function (x) { x.classList.remove('on'); });
+        b.classList.add('on');
+        onPick(b.getAttribute('data-v'));
+      });
+    });
+  }
+
+  // ---------- ekrany ----------
+  var SCREENS = {};
+
+  SCREENS.start = function () {
+    h('<h1>Jesteś w kręgu</h1>' +
+      '<div class="card"><p class="lead">Odłóż telefon ekranem w dół.</p>' +
+      '<p class="muted">Kiedy będzie potrzebny, ekran sam się zmieni.</p></div>');
+  };
+
+  function sixteen(q, title) {
+    var cur = S[q];
+    h('<span class="tag">' + title + '</span>' +
+      '<h1>Czy grupę samopomocową (np. AA lub NA) warto polecić szesnastolatkowi, który ma problem z alkoholem lub narkotykami?</h1>' +
+      '<div class="opts">' +
+      '<button class="opt" data-v="tak">Tak</button>' +
+      '<button class="opt" data-v="nie">Nie</button>' +
+      '<button class="opt" data-v="nie_wiem">Nie wiem</button></div>' +
+      '<div class="done" id="st"></div>' +
+      '<p class="small">Odpowiedź jest anonimowa. Wyniki zobaczymy na końcu.</p>');
+    choiceGroup('.opt', cur, function (v) { S[q] = v; save(); status($('#st'), send(q, v)); });
+  }
+  SCREENS.q16a = function () { sixteen('q16a', 'Pytanie na start'); };
+  SCREENS.q16b = function () { sixteen('q16b', 'Pytanie na koniec'); };
+
+  SCREENS.zgadnij = function () {
+    var z = S.zgadnij || {};
+    h('<span class="tag">Zgadnij</span><h1>Liczby z badań</h1>' +
+      '<div class="card"><div class="q">1. Badanie Project MATCH (USA): osoby po leczeniu uzależnienia od alkoholu, które w AA pomagały innym alkoholikom. Jaki procent z nich nie pił przez kolejny rok?</div>' +
+      '<div class="val" id="va">—</div><input type="range" min="0" max="100" step="1" id="ra"></div>' +
+      '<div class="card"><div class="q">2. A jaki procent tych, którzy innym nie pomagali?</div>' +
+      '<div class="val" id="vb">—</div><input type="range" min="0" max="100" step="1" id="rb"></div>' +
+      '<div class="card"><div class="q">3. Ankieta wśród ponad 9 tys. członków AA w Polsce. Co najczęściej wskazywali jako szczególnie ważne w trzeźwieniu?</div>' +
+      '<div class="opts">' +
+      '<button class="opt left" data-v="sila">Odnalezienie siły wyższej</button>' +
+      '<button class="opt left" data-v="mityngi">Regularne mityngi</button>' +
+      '<button class="opt left" data-v="sponsor">Praca ze sponsorem</button>' +
+      '<button class="opt left" data-v="pomaganie">Pomaganie innym</button></div></div>' +
+      '<button class="go" id="go" disabled>Wyślij</button><div class="done" id="st"></div>');
+    var ra = $('#ra'), rb = $('#rb'), go = $('#go');
+    var touched = { a: z.a != null, b: z.b != null }, c = z.c || null;
+    ra.value = z.a != null ? z.a : 50; rb.value = z.b != null ? z.b : 50;
+    function upd() {
+      $('#va').textContent = touched.a ? ra.value + '%' : '— przesuń suwak';
+      $('#vb').textContent = touched.b ? rb.value + '%' : '— przesuń suwak';
+      go.disabled = !(touched.a && touched.b && c);
+    }
+    ra.addEventListener('input', function () { touched.a = true; upd(); });
+    rb.addEventListener('input', function () { touched.b = true; upd(); });
+    choiceGroup('.opt', c, function (v) { c = v; upd(); });
+    upd();
+    go.addEventListener('click', function () {
+      var v = { a: Number(ra.value), b: Number(rb.value), c: c };
+      S.zgadnij = v; save(); status($('#st'), send('zgadnij', v));
+    });
+  };
+
+  function circleCard(k) {
+    var rules = '<ul class="rules"><li>Mówisz o sobie, w pierwszej osobie.</li><li>Nie komentujemy cudzych wypowiedzi i nie doradzamy.</li><li>Możesz powiedzieć „pasuję”.</li><li>Po każdej wypowiedzi krąg mówi: „dziękujemy”.</li></ul>';
+    var qs = '<ol>' + THREE_Q.map(function (q) { return '<li>' + esc(q) + '</li>'; }).join('') + '</ol>';
+    if (k === 'A') {
+      return '<div class="card"><span class="tag">Krąg A</span><h2>Zwykła rozmowa</h2>' +
+        '<p>Rozmawiajcie tak, jak zwykle rozmawiacie w grupie: możecie dopytywać, komentować, doradzać i dzielić się opiniami.</p>' +
+        '<p><b>Temat:</b> ' + esc(TOPIC_TXT) + '</p><p class="small">Pytania na start:</p>' + qs +
+        '<p class="small">Czas: ok. 12 minut.</p></div>';
+    }
+    return '<div class="card"><span class="tag">Krąg B</span><h2>Format mityngu</h2>' + rules +
+      '<p><b>Temat:</b> ' + esc(TOPIC_TXT) + '</p><p class="small">Trzy pytania:</p>' + qs +
+      '<p class="small">Czas: ok. 12 minut.</p>' +
+      '<button class="opt" id="lead" style="width:100%;margin-top:6px">Prowadzę ten krąg — pokaż kartę prowadzącego</button>' +
+      '<div id="leadCard" class="hidden"><h2>Karta prowadzącego</h2><ol class="script">' +
+      '<li>Przywitaj krąg i powiedz, że ten krąg działa jak mityng.</li>' +
+      '<li>Przeczytaj zasady (powyżej).</li>' +
+      '<li>Przeczytaj temat i trzy pytania. Daj chwilę ciszy na zastanowienie.</li>' +
+      '<li>Oddaj głos po kolei. Każdy mówi ok. 1 minuty albo mówi „pasuję”. Po każdej wypowiedzi: „dziękujemy”.</li>' +
+      '<li>Pilnuj, żeby nikt nie komentował i nie doradzał — wystarczy przypomnieć zasadę.</li>' +
+      '<li>Jeśli zostanie czas, zaproś chętnych do drugiej rundy.</li>' +
+      '<li>Zakończ: „Dziękuję wszystkim. Co padło w kręgu, zostaje w kręgu.”</li></ol></div></div>';
+  }
+
+  SCREENS.kregi = function () {
+    h('<span class="tag">Eksperyment</span><h1>W którym jesteś kręgu?</h1>' +
+      '<div class="opts two"><button class="opt" data-v="A">Krąg A</button><button class="opt" data-v="B">Krąg B</button></div>' +
+      '<div id="cc"></div>');
+    function show(k) {
+      $('#cc').innerHTML = k ? circleCard(k) : '';
+      var lead = $('#lead');
+      if (lead) lead.addEventListener('click', function () { $('#leadCard').classList.toggle('hidden'); });
+    }
+    choiceGroup('.opts .opt', S.circle, function (v) { S.circle = v; save(); show(v); });
+    show(S.circle);
+  };
+
+  SCREENS.ocena = function () {
+    var o = S.ocena || {};
+    var items = [
+      ['s1', 'Mówienie w tym kręgu było bezpieczne.'],
+      ['s2', 'Miałem/am poczucie, że ktoś mnie naprawdę słucha.'],
+      ['s3', 'Zatrzymałem/am coś dla siebie, choć chciałem/am to powiedzieć.']
+    ];
+    var html = '<span class="tag">Oceń swój krąg</span><h1>Jak było w twoim kręgu?</h1>' +
+      '<div class="card"><div class="q">Twój krąg</div><div class="opts two" id="circ">' +
+      '<button class="opt" data-v="A">Krąg A</button><button class="opt" data-v="B">Krąg B</button></div></div>';
+    items.forEach(function (it) {
+      html += '<div class="card"><div class="q">' + it[1] + '</div><div class="scale" data-k="' + it[0] + '">' +
+        [1, 2, 3, 4, 5].map(function (n) { return '<button data-v="' + n + '">' + n + '</button>'; }).join('') +
+        '</div><div class="anchors"><span>zupełnie nie</span><span>całkowicie tak</span></div></div>';
+    });
+    html += '<button class="go" id="go" disabled>Wyślij</button><div class="done" id="st"></div>';
+    h(html);
+    var circle = S.circle || null;
+    var vals = { s1: o.s1 || null, s2: o.s2 || null, s3: o.s3 || null };
+    var go = $('#go');
+    function upd() { go.disabled = !(circle && vals.s1 && vals.s2 && vals.s3); }
+    choiceGroup('#circ .opt', circle, function (v) { circle = v; S.circle = v; save(); upd(); });
+    $$('.scale').forEach(function (sc) {
+      var k = sc.getAttribute('data-k');
+      Array.prototype.forEach.call(sc.querySelectorAll('button'), function (b) {
+        if (String(vals[k]) === b.getAttribute('data-v')) b.classList.add('on');
+        b.addEventListener('click', function () {
+          Array.prototype.forEach.call(sc.querySelectorAll('button'), function (x) { x.classList.remove('on'); });
+          b.classList.add('on'); vals[k] = Number(b.getAttribute('data-v')); upd();
+        });
+      });
+    });
+    upd();
+    go.addEventListener('click', function () {
+      var v = { c: circle, s1: vals.s1, s2: vals.s2, s3: vals.s3 };
+      S.ocena = v; save(); status($('#st'), send('ocena', v));
+    });
+  };
+
+  SCREENS.kryzysy = function () {
+    h('<span class="tag">Kryzysy w grupie</span><h1>Który jesteście zespół?</h1>' +
+      '<div class="opts four"><button class="opt" data-v="1">1</button><button class="opt" data-v="2">2</button><button class="opt" data-v="3">3</button><button class="opt" data-v="4">4</button></div>' +
+      '<div id="kc"></div>');
+    function show() {
+      var team = S.team;
+      if (!team) { $('#kc').innerHTML = ''; return; }
+      var card = S.card || TEAM_CARD[team];
+      var c = CRISES[card];
+      var draft = (S.drafts && S.drafts[card]) || '';
+      $('#kc').innerHTML = '<div class="card"><span class="tag">Wasz kryzys</span><h2>' + esc(c.t) + '</h2><p class="lead">' + esc(c.d) + '</p></div>' +
+        '<div class="card"><div class="q">Jaka zasada grupy zapobiegłaby temu problemowi albo go rozwiązała?</div>' +
+        '<p class="small">Uzgodnijcie ją w zespole. Wystarczy, że wyśle ją jedna osoba.</p>' +
+        '<textarea id="tx" maxlength="300" placeholder="Wasza zasada w 1–2 zdaniach">' + esc(draft) + '</textarea>' +
+        '<button class="go" id="go">Wyślij na ekran</button><div class="done" id="st"></div></div>' +
+        '<p class="small">Skończyliście wcześniej? <button class="link" id="spare">Weźcie kartę zapasową</button></p>';
+      var tx = $('#tx');
+      tx.addEventListener('input', function () { S.drafts = S.drafts || {}; S.drafts[card] = tx.value; save(); });
+      $('#go').addEventListener('click', function () {
+        var text = tx.value.trim();
+        if (!text) { $('#st').textContent = 'Najpierw wpiszcie zasadę.'; $('#st').className = 'done err'; return; }
+        status($('#st'), send('kryzys', { card: card, team: Number(team), text: text }));
+      });
+      $('#spare').addEventListener('click', function () {
+        var i = SPARE.indexOf(S.card);
+        S.card = SPARE[(i + 1) % SPARE.length]; save(); show(); window.scrollTo(0, 0);
+      });
+    }
+    choiceGroup('.opts .opt', S.team, function (v) { S.team = v; S.card = null; save(); show(); });
+    show();
+  };
+
+  SCREENS.debata = function () {
+    h('<span class="tag">Debata</span><h1>' + esc(MOTION) + '</h1>' +
+      '<div class="card"><div class="q">Twoja drużyna</div><div class="opts two">' +
+      '<button class="opt" data-v="za">Za</button><button class="opt" data-v="przeciw">Przeciw</button></div></div>' +
+      '<div id="dc"></div>');
+    function show(side) {
+      if (!side) { $('#dc').innerHTML = ''; return; }
+      var ev = EVIDENCE[side].map(function (e) {
+        return '<div class="ev"><b>' + esc(e.t) + '</b>' + esc(e.d) + '<div class="src">Źródło: ' + esc(e.s) + '</div></div>';
+      }).join('');
+      $('#dc').innerHTML = '<div class="card"><h2>Wasze argumenty i dowody</h2>' + ev +
+        '<p class="small">Możecie dodać własne argumenty — z doświadczenia, z innych zajęć, z eseju.</p></div>' +
+        '<div class="card"><h2>Przebieg</h2><ol class="script">' +
+        '<li>3 min — przygotowanie w drużynie, wybierzcie mówcę.</li>' +
+        '<li>2 min — mowa drużyny Za.</li><li>2 min — mowa drużyny Przeciw.</li>' +
+        '<li>1 min — riposta Za.</li><li>1 min — riposta Przeciw.</li>' +
+        '<li>Głosowanie na telefonach.</li></ol></div>';
+    }
+    choiceGroup('.opts .opt', S.side, function (v) { S.side = v; save(); show(v); });
+    show(S.side);
+  };
+
+  SCREENS.glos = function () {
+    var cur = S.glos;
+    h('<span class="tag">Głosowanie po debacie</span><h1>' + esc(MOTION) + '</h1>' +
+      '<p class="muted">Głosuj tak, jak naprawdę uważasz — niezależnie od drużyny.</p>' +
+      '<div class="opts"><button class="opt" data-v="tak">Tak</button><button class="opt" data-v="nie">Nie</button><button class="opt" data-v="zalezy">To zależy</button></div>' +
+      '<div class="done" id="st"></div>');
+    choiceGroup('.opt', cur, function (v) { S.glos = v; save(); status($('#st'), send('glos', v)); });
+  };
+
+  SCREENS.kontakty = function () {
+    h('<span class="tag">Gdzie szukać pomocy</span><h1>Zapisz albo zrób zrzut ekranu</h1>' +
+      '<div class="card">' +
+      '<div class="contact"><div class="who">Anonimowi Alkoholicy — infolinia</div><a class="tel" href="tel:801033242">801 033 242</a><div class="small">tel./SMS: <a href="tel:+48727777989">+48 727 777 989</a></div></div>' +
+      '<div class="contact"><div class="who">Anonimowi Narkomani</div><a href="https://www.anonimowinarkomani.org">anonimowinarkomani.org</a><div class="small">spis mityngów i kontakt</div></div>' +
+      '<div class="contact"><div class="who">Al-Anon i Alateen — dla bliskich, także nastolatków</div><a href="https://www.al-anon.org.pl">al-anon.org.pl</a><div class="small">tel. <a href="tel:+48618289307">61 828 93 07</a></div></div>' +
+      '<div class="contact"><div class="who">Telefon zaufania dla dzieci i młodzieży</div><a class="tel" href="tel:116111">116 111</a><div class="small">bezpłatny, anonimowy, całodobowy</div></div>' +
+      '</div>');
+  };
+
+  SCREENS.koniec = function () {
+    h('<h1>Dziękuję za krąg</h1><div class="card"><p class="lead">Ostatnia runda: jedno zdanie — co wynoszę z tego kręgu.</p>' +
+      '<p class="muted">Telefon możesz już schować.</p></div>');
+  };
+
+  var STEPS = [
+    ['start', 'Początek'], ['q16a', 'Pytanie na start'], ['zgadnij', 'Zgadnij — liczby z badań'],
+    ['kregi', 'Dwa kręgi'], ['ocena', 'Oceń swój krąg'], ['kryzysy', 'Kryzysy w grupie'],
+    ['debata', 'Debata'], ['glos', 'Głosowanie po debacie'], ['kontakty', 'Gdzie szukać pomocy'],
+    ['q16b', 'Pytanie na koniec'], ['koniec', 'Koniec']
+  ];
+
+  // ---------- sterowanie ekranami ----------
+  var current = null, lastN = 0;
+  function setPhase(p) {
+    if (!SCREENS[p] || p === current) return;
+    current = p;
+    SCREENS[p]();
+    window.scrollTo(0, 0);
+    if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) { try { navigator.vibrate(40); } catch (e) {} }
+  }
+
+  var ml = document.getElementById('manualList');
+  STEPS.forEach(function (st) {
+    var b = document.createElement('button');
+    b.textContent = st[1];
+    b.addEventListener('click', function () {
+      current = null; setPhase(st[0]);
+      document.getElementById('manual').classList.add('hidden');
+    });
+    ml.appendChild(b);
+  });
+  document.getElementById('manualBtn').addEventListener('click', function () {
+    document.getElementById('manual').classList.toggle('hidden');
+  });
+
+  setPhase('start');
+  subscribe(TOPIC_CTRL, function (d) {
+    if (d && d.t === 'ph' && (d.n || 0) > lastN) { lastN = d.n || 0; setPhase(d.p); }
+  }, setConn);
+
+  // zgłoszenie obecności (raz na sesję)
+  if (!lsGet('krag-hi-' + CODE)) {
+    publish(TOPIC_ANS, { t: 'hi', pid: pid, ts: Date.now() }).then(function () { lsSet('krag-hi-' + CODE, '1'); }).catch(function () {});
+  }
+})();
+</script>
+</body>
+</html>

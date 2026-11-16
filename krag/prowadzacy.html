@@ -1,0 +1,699 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Dlaczego krąg krzeseł leczy — prezentacja</title>
+<style>
+:root{
+  --bg:#fbfaf7; --ink:#16181d; --ink2:#52514e; --muted:#6b6a66; --line:#e1e0d9; --axis:#c3c2b7;
+  --s1:#2a78d6; --s2:#eb6834; --card:#ffffff; --soft:#f2f0ea;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+#stage{position:absolute;left:50%;top:50%;width:1600px;height:900px;background:var(--bg);transform-origin:center center}
+.slide{position:absolute;inset:0;padding:64px 92px 54px;display:flex;flex-direction:column}
+.kicker{font-size:22px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);font-weight:650}
+h1{font-size:64px;line-height:1.08;margin:14px 0 0;font-weight:720;letter-spacing:-.01em}
+h1.q{font-size:52px;line-height:1.15}
+.sub{font-size:34px;color:var(--ink2);margin-top:18px;line-height:1.3}
+.body{font-size:38px;line-height:1.38;margin-top:30px}
+.body p{margin:0 0 18px}
+.big{font-size:56px;font-weight:700;line-height:1.15}
+.foot{margin-top:auto;font-size:20px;color:var(--muted);line-height:1.35}
+.row{display:flex;gap:48px}
+.col{flex:1;min-width:0}
+ol.rules{font-size:42px;line-height:1.3;margin:34px 0 0;padding-left:56px}
+ol.rules li{margin:0 0 18px;padding-left:8px}
+ul.plain{font-size:36px;line-height:1.35;margin:26px 0 0;padding-left:44px}
+ul.plain li{margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 34px}
+.card h3{font-size:34px;margin:0 0 12px}
+.card p{font-size:30px;line-height:1.35;margin:0}
+.tag{display:inline-block;font-size:20px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+.live{font-size:30px;color:var(--ink2);margin-top:26px}
+.live b{font-size:72px;color:var(--ink);font-weight:720;margin-right:12px}
+.chips{display:flex;flex-wrap:wrap;gap:16px;margin-top:24px}
+.chip{font-size:30px;padding:12px 24px;border-radius:999px;background:var(--card);border:1px solid var(--line)}
+.box{border:2px solid var(--line);border-radius:18px;padding:22px 28px;margin-top:22px;background:var(--card)}
+.box .lbl{font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);font-weight:650;margin-bottom:8px}
+.box .txt{font-size:32px;line-height:1.35}
+.box .txt + .txt{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.box.sol{border-color:var(--ink);background:var(--soft)}
+.empty{color:var(--muted)}
+.timer{font-size:220px;font-weight:720;font-variant-numeric:tabular-nums;line-height:1;cursor:pointer;user-select:none}
+.timer.run{color:var(--ink)}
+.timer:not(.run){color:var(--ink2)}
+.timer.end{color:#d03b3b}
+.tbtns{display:flex;gap:14px;margin-top:22px}
+.tbtns button{font:inherit;font-size:24px;padding:12px 20px;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer}
+.hint{font-size:20px;color:var(--muted);margin-top:14px}
+.qr{background:#fff;padding:0;border-radius:12px;overflow:hidden}
+.qr svg{display:block;width:100%;height:100%}
+.ringwrap{position:relative}
+.ringwrap svg.ring{position:absolute;inset:0}
+.ringwrap .qr{position:absolute}
+.biblio{columns:2;column-gap:56px;font-size:18px;line-height:1.36;margin-top:24px}
+.biblio p{margin:0 0 11px;break-inside:avoid;padding-left:24px;text-indent:-24px}
+.dim{color:var(--muted)}
+
+/* wykresy */
+.chart{margin-top:28px}
+.legend{display:flex;gap:34px;font-size:24px;color:var(--ink2);margin-bottom:18px}
+.legend span{display:flex;align-items:center;gap:10px}
+.legend i{width:18px;height:18px;border-radius:4px;display:inline-block}
+.grp{display:flex;align-items:center;padding:12px 0}
+.glabel{width:430px;flex:none;font-size:28px;line-height:1.2;padding-right:24px}
+.glabel.hl{font-weight:720}
+.plot{position:relative;flex:1;border-left:1px solid var(--axis);padding:4px 0}
+.brow{display:flex;align-items:center;height:30px;margin:4px 0}
+.bar{height:24px;border-radius:0 4px 4px 0;min-width:2px}
+.bval{font-size:26px;margin-left:14px;color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+.bval.dim{color:var(--ink2)}
+.ticks{display:flex;margin-left:430px;position:relative;height:30px;font-size:20px;color:var(--muted)}
+.ticks span{position:absolute;transform:translateX(-50%)}
+.cap{font-size:30px;line-height:1.35;margin-top:22px}
+.chart.compact .grp{padding:2px 0}
+.chart.compact .glabel{font-size:24px}
+.chart.compact .brow{height:28px;margin:2px 0}
+.chart.compact .bval{font-size:23px}
+.box .txt{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.cap b{font-weight:720}
+
+/* nakładki */
+#hud{position:fixed;right:14px;bottom:10px;display:flex;align-items:center;gap:10px;font:14px system-ui,sans-serif;color:var(--ink2);opacity:.35;transition:opacity .2s;z-index:5}
+#hud:hover{opacity:1}
+#hud button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:8px;padding:2px 10px;cursor:pointer}
+.dot{width:9px;height:9px;border-radius:50%;background:#898781;display:inline-block}
+.dot.ok{background:#0ca30c}.dot.err{background:#d03b3b}
+#warn{position:fixed;left:50%;top:12px;transform:translateX(-50%);background:#fff3f0;border:1px solid #f0c4b8;color:#8a2b17;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:10px;z-index:6}
+#panel{position:fixed;right:16px;top:16px;width:420px;max-height:calc(100% - 60px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:18px 20px;font:15px/1.45 system-ui,sans-serif;z-index:7}
+#panel h4{margin:0 0 8px;font-size:17px}
+#panel .qrs{width:180px;height:180px;margin:8px 0}
+#panel button{font:inherit;display:block;width:100%;text-align:left;margin:6px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fafaf8;cursor:pointer}
+#panel code{background:#f2f0ea;padding:1px 5px;border-radius:5px;word-break:break-all}
+#panel table{border-collapse:collapse;width:100%;margin-top:6px}
+#panel td{padding:2px 4px;border-bottom:1px solid #f0efea}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="stage"></div>
+
+<div id="hud">
+  <button id="prevB" title="Poprzedni (←)">‹</button><span id="pos"></span><button id="nextB" title="Następny (→)">›</button>
+  <span class="dot" id="hdot"></span><span id="hcount">0 osób</span>
+  <button id="panelB" title="Panel prowadzącego (N)">N</button>
+</div>
+<div id="warn" class="hidden"></div>
+<div id="panel" class="hidden"></div>
+
+<script src="qrcode.js"></script>
+<script>
+(() => {
+'use strict';
+
+// ================= konfiguracja i sesja =================
+const P = new URLSearchParams(location.search);
+const MOCK = P.get('mock') === '1';
+let CODE = (P.get('s') || '').toLowerCase();
+if (!/^[a-z0-9]{6,20}$/.test(CODE)) {
+  CODE = Array.from({ length: 8 }, () => 'abcdefghijkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 32)]).join('');
+  P.set('s', CODE);
+  history.replaceState(null, '', location.pathname + '?' + P.toString() + location.hash);
+}
+const TOPIC_CTRL = 'krag-' + CODE + '-c';
+const TOPIC_ANS = 'krag-' + CODE + '-a';
+const PART_URL = new URL('./', location.href).href + '?s=' + CODE + (MOCK ? '&mock=1' : '');
+const PART_SHORT = PART_URL.replace(/^https?:\/\//, '');
+
+// ================= transport =================
+const NTFY = 'https://ntfy.sh/';
+const bc = MOCK && 'BroadcastChannel' in window ? new BroadcastChannel('krag-mock') : null;
+const mockSubs = [];
+function publish(topic, obj) {
+  if (MOCK) {
+    const msg = { id: Math.random().toString(36).slice(2), time: Math.floor(Date.now() / 1000), event: 'message', topic, message: JSON.stringify(obj) };
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('krag-mock:' + topic) || '[]'); } catch (e) {}
+    list.push(msg);
+    try { localStorage.setItem('krag-mock:' + topic, JSON.stringify(list)); } catch (e) {}
+    if (bc) bc.postMessage(msg);
+    mockSubs.forEach(s => { if (s.topic === topic) s.handle(msg); });
+    return Promise.resolve(true);
+  }
+  return fetch(NTFY + topic, { method: 'POST', body: JSON.stringify(obj) }).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return true; });
+}
+function subscribe(topic, onData, onState) {
+  const seen = {};
+  const handle = m => {
+    if (!m || m.event !== 'message' || seen[m.id]) return;
+    seen[m.id] = 1;
+    let d; try { d = JSON.parse(m.message); } catch (e) { return; }
+    onData(d, m);
+  };
+  if (MOCK) {
+    let list = [];
+    try { list = JSON.parse(localStorage.getItem('krag-mock:' + topic) || '[]'); } catch (e) {}
+    list.forEach(handle);
+    mockSubs.push({ topic, handle });
+    if (bc) bc.addEventListener('message', e => { if (e.data && e.data.topic === topic) handle(e.data); });
+    onState('ok');
+    return { refresh: () => Promise.resolve() };
+  }
+  onState('conn');
+  const es = new EventSource(NTFY + topic + '/sse?since=all');
+  es.onopen = () => onState('ok');
+  es.onmessage = e => { try { handle(JSON.parse(e.data)); } catch (_) {} };
+  es.onerror = () => onState(es.readyState === 2 ? 'err' : 'conn');
+  return {
+    refresh: () => fetch(NTFY + topic + '/json?poll=1&since=all').then(r => r.text())
+      .then(t => { t.split('\n').forEach(l => { if (l.trim()) { try { handle(JSON.parse(l)); } catch (_) {} } }); })
+  };
+}
+
+// ================= dane z sali =================
+const DATA = { pids: {}, ans: {} };
+let conn = 'conn';
+function onAnswer(d, m) {
+  if (!d || !d.pid) return;
+  DATA.pids[d.pid] = 1;
+  if (d.t === 'ans' && d.q) {
+    const b = DATA.ans[d.q] || (DATA.ans[d.q] = {});
+    const key = d.q === 'kryzys' && d.v && d.v.card ? d.pid + ':' + d.v.card : d.pid;
+    const ts = d.ts || m.time * 1000;
+    if (!b[key] || b[key].ts <= ts) b[key] = { v: d.v, ts };
+  }
+  updateHud();
+  scheduleRender();
+}
+const answers = q => Object.values(DATA.ans[q] || {});
+const nAns = q => answers(q).length;
+const nPeople = () => Object.keys(DATA.pids).length;
+function countBy(q, keys, get) {
+  const c = {}; keys.forEach(k => c[k] = 0);
+  answers(q).forEach(e => { const k = get ? get(e.v) : e.v; if (k in c) c[k]++; });
+  return c;
+}
+const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
+const fmt1 = v => v == null ? '—' : v.toFixed(1).replace('.', ',');
+const pct = (n, t) => t ? Math.round(n / t * 100) : 0;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+// ================= elementy wizualne =================
+function qrSvg(text, px) {
+  const q = qrcode(0, 'M'); q.addData(text); q.make();
+  return '<div class="qr" style="width:' + px + 'px;height:' + px + 'px">' + q.createSvgTag({ cellSize: 8, margin: 2, scalable: true }) + '</div>';
+}
+function ring(size, r, n, dot, color) {
+  let s = '<svg class="ring" width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '" aria-hidden="true">';
+  for (let i = 0; i < n; i++) {
+    const a = i / n * Math.PI * 2 - Math.PI / 2;
+    s += '<circle cx="' + (size / 2 + r * Math.cos(a)).toFixed(1) + '" cy="' + (size / 2 + r * Math.sin(a)).toFixed(1) + '" r="' + dot + '" fill="' + color + '"/>';
+  }
+  return s + '</svg>';
+}
+function qrInRing(size) {
+  const q = Math.round(size * 0.5);
+  return '<div class="ringwrap" style="width:' + size + 'px;height:' + size + 'px">' + ring(size, size / 2 - 22, 12, 15, '#16181d') +
+    '<div style="position:absolute;left:' + (size - q) / 2 + 'px;top:' + (size - q) / 2 + 'px">' + qrSvg(PART_URL, q) + '</div></div>';
+}
+const plural = (n, one, few, many) => n === 1 ? one : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? few : many;
+const joinedTxt = n => n === 1 ? 'dołączyła 1 osoba' : plural(n, '', 'dołączyły ' + n + ' osoby', 'dołączyło ' + n + ' osób');
+const odp = n => plural(n, 'odpowiedź', 'odpowiedzi', 'odpowiedzi');
+const liveCount = n => '<div class="live"><b>' + n + '</b>' + odp(n) + ' · ' + joinedTxt(nPeople()) + '</div>';
+
+// Wykres słupkowy poziomy. series: [{name,color}], groups: [{label, values:[...], hl}], max, fmt
+function hbar({ series, groups, max, fmt, ticks, legend = true, plotW = 760, compact = false }) {
+  let h = '<div class="chart' + (compact ? ' compact' : '') + '">';
+  if (legend && series.length > 1) {
+    h += '<div class="legend">' + series.map(s => '<span><i style="background:' + s.color + '"></i>' + esc(s.name) + '</span>').join('') + '</div>';
+  }
+  groups.forEach(g => {
+    h += '<div class="grp"><div class="glabel' + (g.hl ? ' hl' : '') + '">' + g.label + '</div><div class="plot">';
+    g.values.forEach((v, i) => {
+      if (v === undefined) return;
+      const w = v == null ? 0 : Math.max(0, Math.min(1, v / max)) * plotW;
+      h += '<div class="brow"><div class="bar" style="width:' + w.toFixed(1) + 'px;background:' + series[i].color + '" title="' + esc(series[i].name + ': ' + fmt(v, i, g)) + '"></div>' +
+        '<span class="bval' + (v == null ? ' dim' : '') + '">' + fmt(v, i, g) + '</span></div>';
+    });
+    h += '</div></div>';
+  });
+  if (ticks) {
+    h += '<div class="ticks">' + ticks.map(t => '<span style="left:' + (t.v / max * plotW).toFixed(1) + 'px">' + t.l + '</span>').join('') + '</div>';
+  }
+  return h + '</div>';
+}
+
+// ================= treść =================
+const QUESTION16 = 'Czy grupę samopomocową (np. AA lub NA) warto polecić szesnastolatkowi, który ma problem z alkoholem lub narkotykami?';
+const MOTION = 'Szesnastolatek, który chodzi na mityngi, powinien mówić o sobie: „jestem uzależniony”.';
+const TOPIC_TXT = 'Coś, z czym trudno mi skończyć';
+const THREE_Q = ['Z czym trudno mi skończyć — i kiedy to zauważyłem/am?', 'Co mi to daje, a co zabiera?', 'Co mi kiedyś pomogło, choćby na chwilę?'];
+const CRISES = [
+  { k: 'k1', who: 'Zespół 1', t: 'Dobra rada', d: 'Jedna osoba komentuje każdą wypowiedź i mówi innym, co mają zrobić. Nowe osoby przestają się odzywać.',
+    s: 'Format mityngu: mówimy o sobie, w pierwszej osobie — bez komentowania cudzych wypowiedzi i bez rad.' },
+  { k: 'k2', who: 'Zespół 2', t: 'Lider', d: 'Założyciel prowadzi grupę od pięciu lat i o wszystkim decyduje sam. Kto się z nim nie zgadza, przestaje być mile widziany.',
+    s: 'Tradycja 2: liderzy są tylko zaufanymi sługami i nie rządzą — decyduje sumienie grupy. W praktyce służby się zmieniają (rotacja).' },
+  { k: 'k3', who: 'Zespół 3', t: 'Pieniądze z zewnątrz', d: 'Producent napojów energetycznych proponuje, że przez rok zapłaci za salę — w zamian za swoje logo na drzwiach.',
+    s: 'Tradycja 7: grupa sama się utrzymuje i nie przyjmuje pieniędzy z zewnątrz. Tradycja 6: nie popiera i nie firmuje innych przedsięwzięć.' },
+  { k: 'k4', who: 'Zespół 4', t: 'Polityka', d: 'Przed debatą o legalizacji marihuany część grupy chce, żeby grupa publicznie poparła jedną ze stron. Zaczynają się kłótnie.',
+    s: 'Tradycja 10: AA nie zajmują stanowiska w sprawach spoza wspólnoty — żeby nie wciągać jej w publiczne spory.' },
+  { k: 'k5', who: 'Karta zapasowa', t: 'Plotka', d: 'Ktoś opowiada znajomym, kogo widział na mityngu.',
+    s: 'Tradycja 12: anonimowość jest duchową podstawą wszystkich tradycji — zasady stawiamy przed osobami. Tradycja 11: w mediach nikt nie występuje jako członek AA z nazwiskiem i twarzą.' },
+  { k: 'k6', who: 'Karta zapasowa', t: 'Kto może przyjść?', d: 'Na mityng przychodzi 17-latek, który „tylko” pali marihuanę w weekendy. Część grupy uważa, że to nie miejsce dla niego.',
+    s: 'Tradycja 3: jedynym warunkiem członkostwa jest pragnienie zaprzestania picia (w NA — używania). Nikt nie ocenia, czy ktoś „ma prawo” przyjść.' },
+  { k: 'k7', who: 'Karta zapasowa', t: 'Milczący', d: 'Ktoś przychodzi od roku, zawsze siedzi cicho i nigdy nic nie mówi. Czy grupa powinna coś z tym zrobić?',
+    s: 'Tu tradycje nie dają gotowej odpowiedzi. Nikt nie musi mówić — ale format nie wymusza też pracy nad sobą. To jedno z ograniczeń z mojego eseju.' }
+];
+const PL_RANK = [
+  ['Regularne mityngi', 61.7], ['Czerpanie z doświadczeń innych', 48.3], ['Grupa macierzysta', 38.8], ['Odnalezienie siły wyższej', 29.4],
+  ['Akceptacja', 28.6], ['Poczucie przynależności', 24.4], ['Służby', 20.8], ['Pomaganie innym', 17.2], ['Praca ze sponsorem', 14.3], ['Sponsorowanie', 3.9]
+];
+const BIBLIO = [
+  'Best, D., Beckwith, M., Haslam, C., Haslam, S.A., Jetten, J., Mawson, E., Lubman, D.I. (2016). Overcoming alcohol and other drug addiction as a process of social identity transition: The social identity model of recovery (SIMOR). <i>Addiction Research &amp; Theory</i>, 24(2), 111–123.',
+  'Erikson, E.H. (1968). <i>Identity: Youth and Crisis</i>. New York: Norton.',
+  'Fundacja Biuro Służby Krajowej AA w Polsce (b.d.). <i>Anonimowi Alkoholicy w liczbach. Wyniki badania ankietowego Wspólnoty AA w Polsce przeprowadzonego w latach 2017–2018</i>. Warszawa.',
+  'Fundacja Biuro Służby Krajowej AA w Polsce (b.d.). <i>Dwanaście Kroków i Dwanaście Tradycji</i>. Warszawa.',
+  'Kelly, J.F., Hoeppner, B., Stout, R.L., Pagano, M. (2012). Determining the relative importance of the mechanisms of behavior change within Alcoholics Anonymous: A multiple mediator analysis. <i>Addiction</i>, 107(2), 289–299.',
+  'Kelly, J.F., Humphreys, K., Ferri, M. (2020). Alcoholics Anonymous and other 12-step programs for alcohol use disorder. <i>Cochrane Database of Systematic Reviews</i>, Issue 3, Art. No.: CD012880.',
+  'Kelly, J.F., Myers, M.G., Brown, S.A. (2005). The effects of age composition of 12-step groups on adolescent 12-step participation and substance use outcome. <i>Journal of Child &amp; Adolescent Substance Abuse</i>, 15(1), 63–72.',
+  'Kelly, J.F., Myers, M.G., Rodolico, J. (2008). What do adolescents exposed to Alcoholics Anonymous think about 12-step groups? <i>Substance Abuse</i>, 29(2), 53–62.',
+  'Labbe, A.K., Greene, C., Bergman, B.G., Hoeppner, B., Kelly, J.F. (2013). The importance of age composition of 12-step meetings as a moderating factor in the relation between young adults’ 12-step participation and abstinence. <i>Drug and Alcohol Dependence</i>, 133(2). doi:10.1016/j.drugalcdep.2013.07.021',
+  'Pagano, M.E., Friend, K.B., Tonigan, J.S., Stout, R.L. (2004). Helping other alcoholics in Alcoholics Anonymous and drinking outcomes: Findings from Project MATCH. <i>Journal of Studies on Alcohol</i>, 65(6), 766–773.',
+  'Riessman, F. (1965). The „helper” therapy principle. <i>Social Work</i>, 10, 27–32.',
+  'SMART Recovery (b.d.). <i>Why SMART Recovery?</i> [ulotka]; <i>The words we use</i> [blog]. www.smartrecovery.org.',
+  'Yalom, I.D., Leszcz, M. (2006). <i>Psychoterapia grupowa. Teoria i praktyka</i>. Kraków: Wydawnictwo Uniwersytetu Jagiellońskiego.'
+];
+
+function sixteenCounts(q) { return countBy(q, ['tak', 'nie', 'nie_wiem']); }
+
+// ================= slajdy =================
+const SLIDES = [
+  { id: 'tytul', phase: 'start', live: true, html: () => `
+    <div class="row" style="height:100%;align-items:center">
+      <div class="col">
+        <div class="kicker">Warsztat · Praca w grupie</div>
+        <h1 style="font-size:84px">Dlaczego krąg krzeseł leczy</h1>
+        <div class="sub">Czego uczą AA i NA — i czy to działa dla nastolatków</div>
+        <div class="sub" style="margin-top:44px;color:var(--ink);font-weight:600">Adam Leniar</div>
+      </div>
+      <div style="flex:none;text-align:center">
+        ${qrInRing(560)}
+        <div style="font-size:26px;margin-top:14px">Zeskanuj — telefon przyda się kilka razy</div>
+        <div style="font-size:24px;color:var(--ink2);margin-top:6px">Dołączyło: <b style="color:var(--ink)">${nPeople()}</b></div>
+      </div>
+    </div>` },
+
+  { id: 'zasady', phase: 'start', live: true, html: () => `
+    <div class="row" style="flex:1">
+      <div class="col">
+        <div class="kicker">Kontrakt</div>
+        <h1>Zasady kręgu</h1>
+        <ol class="rules">
+          <li>Mówię o sobie, w pierwszej osobie.</li>
+          <li>Nie komentuję i nie doradzam.</li>
+          <li>Mogę milczeć — „pasuję” wystarczy.</li>
+          <li>Co padnie w kręgu, zostaje w kręgu.</li>
+          <li>Telefon — tylko wtedy, gdy o to poproszę.</li>
+        </ol>
+      </div>
+      <div style="flex:none;width:250px;text-align:center;align-self:flex-end">
+        ${qrSvg(PART_URL, 210)}
+        <div style="font-size:20px;color:var(--ink2);margin-top:8px">Spóźnieni: zeskanujcie<br>Dołączyło: <b style="color:var(--ink)">${nPeople()}</b></div>
+      </div>
+    </div>
+    <div class="big" style="font-size:44px;margin-top:18px">To zasady mityngu. Przyjmujemy?</div>` },
+
+  { id: 'dzis', phase: 'start', html: () => `
+    <div class="kicker">Punkt wyjścia</div>
+    <h1>Wiecie już, że to działa</h1>
+    <div class="body">AA i programy 12 kroków dają wyniki porównywalne z terapią, a w utrzymaniu ciągłej abstynencji — lepsze.</div>
+    <div class="big" style="margin-top:46px">Dziś: dlaczego?<br>I czy to działa dla nastolatków?</div>
+    <div class="foot">Kelly, Humphreys, Ferri (2020), przegląd Cochrane — było już na zajęciach.</div>` },
+
+  { id: 'q16a', phase: 'q16a', live: true, html: () => `
+    <div class="kicker">Pytanie na start · telefon</div>
+    <h1 class="q">${QUESTION16}</h1>
+    <div class="body" style="color:var(--ink2)">Tak · Nie · Nie wiem — odpowiedź jest anonimowa.</div>
+    ${liveCount(nAns('q16a'))}
+    <div class="foot">Wyniki pokażę na końcu.</div>` },
+
+  { id: 'zgadnij', phase: 'zgadnij', live: true, html: () => `
+    <div class="kicker">Zgadnij · telefon</div>
+    <h1>Trzy liczby z badań</h1>
+    <ul class="plain">
+      <li>Ilu pomagających innym alkoholikom nie piło przez rok po leczeniu?</li>
+      <li>A ilu tych, którzy nie pomagali?</li>
+      <li>Co członkowie AA w Polsce uznają za najważniejsze w trzeźwieniu?</li>
+    </ul>
+    ${liveCount(nAns('zgadnij'))}` },
+
+  { id: 'pagano', phase: 'zgadnij', live: true, steps: 1, html: st => {
+    const a = answers('zgadnij').map(e => e.v).filter(v => v && typeof v.a === 'number');
+    const ma = mean(a.map(v => v.a)), mb = mean(a.map(v => v.b));
+    const series = [{ name: 'Wasze typy (średnia z sali)', color: 'var(--s1)' }, { name: 'Wynik badania', color: 'var(--s2)' }].slice(0, st >= 1 ? 2 : 1);
+    const f = v => v == null ? 'brak typów' : Math.round(v) + '%';
+    return `
+    <div class="kicker">Zgadnij · wynik 1 i 2</div>
+    <h1>Pomagając innym, pomagasz sobie?</h1>
+    ${st < 1 ? '<div style="font-size:26px;color:var(--ink2);margin-top:14px">Wasze typy — średnia z sali</div>' : ''}
+    ${hbar({ series, max: 100, fmt: f, ticks: [0, 25, 50, 75, 100].map(v => ({ v, l: v + '%' })),
+      groups: [
+        { label: 'Pomagali innym alkoholikom', values: [ma, st >= 1 ? 40 : undefined] },
+        { label: 'Nie pomagali', values: [mb, st >= 1 ? 22 : undefined] }
+      ] })}
+    ${st >= 1 ? '<div class="cap">Wśród pomagających przez rok nie piło <b>40%</b>, wśród niepomagających — <b>22%</b>.<br>To „zasada terapeuty-pomocnika”: pomaganie zmienia pomagającego.</div>' : ''}
+    <div class="foot">Odsetek osób, które nie piły przez 12 miesięcy po leczeniu: Pagano, Friend, Tonigan, Stout (2004), Project MATCH. Zasada: Riessman (1965). Typy z sali: n = ${a.length}.</div>`; } },
+
+  { id: 'pl', phase: 'zgadnij', live: true, steps: 2, html: st => {
+    if (st < 2) {
+      const keys = ['sila', 'mityngi', 'sponsor', 'pomaganie'];
+      const labels = { sila: 'Odnalezienie siły wyższej', mityngi: 'Regularne mityngi', sponsor: 'Praca ze sponsorem', pomaganie: 'Pomaganie innym' };
+      const c = countBy('zgadnij', keys, v => v && v.c);
+      const tot = keys.reduce((s, k) => s + c[k], 0);
+      return `
+      <div class="kicker">Zgadnij · wynik 3</div>
+      <h1>Co pomaga w trzeźwieniu — według członków AA w Polsce?</h1>
+      <div style="font-size:26px;color:var(--ink2);margin-top:14px">Wasze typy (liczba osób):</div>
+      ${hbar({ series: [{ name: 'Wasze typy', color: 'var(--s1)' }], legend: false, max: Math.max(1, ...keys.map(k => c[k])),
+        fmt: v => v + (tot ? ' (' + pct(v, tot) + '%)' : ''),
+        groups: keys.map(k => ({ label: labels[k] + (st >= 1 && k === 'mityngi' ? ' ✓' : ''), hl: st >= 1 && k === 'mityngi', values: [c[k]] })) })}
+      ${st >= 1 ? '<div class="cap">Najczęściej wskazywano <b>regularne mityngi — 61,7%</b>.</div>' : ''}
+      <div class="foot">Anonimowi Alkoholicy w liczbach — ankieta Wspólnoty AA w Polsce 2017–2018, 9110 ankiet.</div>`;
+    }
+    return `
+      <div class="kicker">Zgadnij · wynik 3</div>
+      <h1 style="font-size:50px">Co członkowie AA w Polsce wskazują jako szczególnie ważne</h1>
+      ${hbar({ series: [{ name: 'Odsetek wskazań', color: 'var(--s1)' }], legend: false, max: 70, plotW: 700, compact: true,
+        fmt: v => String(v).replace('.', ',') + '%',
+        groups: PL_RANK.map(([l, v]) => ({ label: l + (l === 'Pomaganie innym' ? ' ←' : ''), hl: l === 'Pomaganie innym', values: [v] })) })}
+      <div class="cap" style="margin-top:14px;font-size:26px">Pomaganie innym wskazało tylko <b>17,2%</b> — choć w badaniu Pagano pomagający pili rzadziej.<br>Przy lżejszym uzależnieniu AA działa prawie wyłącznie przez mechanizmy społeczne (Kelly i in., 2012).</div>
+      <div class="foot">Anonimowi Alkoholicy w liczbach — ankieta 2017–2018, 9110 ankiet; można było wskazać kilka czynników.</div>`; } },
+
+  { id: 'kregi', phase: 'kregi', html: () => `
+    <div class="kicker">Eksperyment · telefon</div>
+    <h1>Dwa kręgi, ten sam temat</h1>
+    <div class="row" style="margin-top:34px">
+      <div class="col card"><span class="tag">Krąg A</span><h3>Zwykła rozmowa</h3><p>Można dopytywać, komentować i doradzać.</p></div>
+      <div class="col card"><span class="tag">Krąg B</span><h3>Format mityngu</h3><p>Mówisz o sobie, bez komentarzy i rad. Prowadzi ochotnik z kartą w telefonie.</p></div>
+    </div>
+    <div class="body" style="margin-top:36px">Temat: <b>${TOPIC_TXT}</b></div>
+    <div class="foot">12 minut · obserwuję oba kręgi · na telefonie wybierz swój krąg.</div>` },
+
+  { id: 'kregi-czas', phase: 'kregi', timer: 720, html: () => `
+    <div class="kicker">Kręgi</div>
+    <div class="row" style="flex:1;align-items:center">
+      <div style="flex:none;width:640px"><div class="timer" id="timer">12:00</div><div class="hint">T albo kliknięcie — start / pauza</div></div>
+      <div class="col">
+        <div class="body" style="margin-top:0">Temat: <b>${TOPIC_TXT}</b></div>
+        <ol class="rules" style="font-size:34px">${THREE_Q.map(q => '<li>' + q + '</li>').join('')}</ol>
+      </div>
+    </div>` },
+
+  { id: 'ocena', phase: 'ocena', live: true, html: () => {
+    const c = countBy('ocena', ['A', 'B'], v => v && v.c);
+    return `
+    <div class="kicker">Oceń swój krąg · telefon</div>
+    <h1>Jak było w twoim kręgu?</h1>
+    <ul class="plain">
+      <li>Mówienie w tym kręgu było bezpieczne.</li>
+      <li>Miałem/am poczucie, że ktoś mnie naprawdę słucha.</li>
+      <li>Zatrzymałem/am coś dla siebie, choć chciałem/am to powiedzieć.</li>
+    </ul>
+    <div class="live"><b>${c.A + c.B}</b>${odp(c.A + c.B)} · krąg A: ${c.A} · krąg B: ${c.B}</div>
+    <div class="foot">Skala 1–5: od „zupełnie nie” do „całkowicie tak”.</div>`; } },
+
+  { id: 'ocena-wyniki', phase: 'ocena', live: true, steps: 1, html: st => {
+    const all = answers('ocena').map(e => e.v).filter(v => v && (v.c === 'A' || v.c === 'B'));
+    const A = all.filter(v => v.c === 'A'), B = all.filter(v => v.c === 'B');
+    const m = (arr, k) => mean(arr.map(v => v[k]).filter(x => typeof x === 'number'));
+    const series = [{ name: 'Krąg A — zwykła rozmowa (n = ' + A.length + ')', color: 'var(--s1)' }, { name: 'Krąg B — format mityngu (n = ' + B.length + ')', color: 'var(--s2)' }];
+    if (st < 1) return `
+      <div class="kicker">Wyniki</div><h1>Krąg A i krąg B</h1>
+      <div class="live"><b>${A.length + B.length}</b>${odp(A.length + B.length)} · krąg A: ${A.length} · krąg B: ${B.length}</div>
+      <div class="foot">Następny klik pokaże wyniki.</div>`;
+    return `
+      <div class="kicker">Wyniki</div><h1>Krąg A i krąg B</h1>
+      ${hbar({ series, max: 5, fmt: v => fmt1(v), ticks: [1, 2, 3, 4, 5].map(v => ({ v, l: String(v) })),
+        groups: [
+          { label: 'Mówienie było bezpieczne', values: [m(A, 's1'), m(B, 's1')] },
+          { label: 'Ktoś mnie naprawdę słuchał', values: [m(A, 's2'), m(B, 's2')] },
+          { label: 'Zatrzymałem/am coś dla siebie', values: [m(A, 's3'), m(B, 's3')] }
+        ] })}
+      <div class="foot">Średnie w skali 1–5. To nie badanie, tylko lustro tej sali.</div>`; } },
+
+  { id: 'format', phase: 'ocena', html: () => `
+    <div class="kicker">Omówienie</div>
+    <h1>Format czy prowadzący?</h1>
+    <div class="body">Krąg B prowadził ochotnik, który pierwszy raz trzymał w ręku tę kartę.</div>
+    <div class="body" style="margin-top:10px;color:var(--ink2)">Co z mechanizmów z mojego eseju pojawiło się w kręgach?</div>
+    <div class="chips"><span class="chip">Uniwersalność</span><span class="chip">Zaszczepianie nadziei</span><span class="chip">Spójność grupy</span><span class="chip">Altruizm</span><span class="chip">Samoskuteczność</span><span class="chip">„Głupio by mi było”</span></div>` },
+
+  { id: 'kryzysy', phase: 'kryzysy', html: () => `
+    <div class="kicker">Praca w zespołach · telefon</div>
+    <h1>Grupa, która nie zamieni się w sektę</h1>
+    <div class="body">Synanon (1958) zaczynał jako wspólnota dla uzależnionych, a skończył jako sekta.</div>
+    <ul class="plain">
+      <li>4 zespoły — każdy dostaje na telefon jeden kryzys.</li>
+      <li>Wymyślcie zasadę, która go rozwiąże — w 1–2 zdaniach.</li>
+      <li>Wyślijcie ją na ekran. Potem porównamy ją z rozwiązaniem AA i NA.</li>
+    </ul>
+    <div class="foot">10 minut · szybsze zespoły biorą karty zapasowe.</div>` },
+
+  { id: 'kryzysy-czas', phase: 'kryzysy', timer: 600, live: true, html: () => {
+    const sent = {}; answers('kryzys').forEach(e => { if (e.v && e.v.card) sent[e.v.card] = 1; });
+    return `
+    <div class="kicker">Kryzysy w grupie</div>
+    <div class="row" style="flex:1;align-items:center">
+      <div style="flex:none;width:640px"><div class="timer" id="timer">10:00</div><div class="hint">T albo kliknięcie — start / pauza</div></div>
+      <div class="col">
+        <div style="font-size:28px;color:var(--ink2);margin-bottom:14px">Wysłane zasady</div>
+        ${CRISES.map(c => '<div style="font-size:32px;margin:8px 0">' + (sent[c.k] ? '✓ ' : '<span class="dim">○ </span>') + esc(c.who + ': ' + c.t) + '</div>').join('')}
+      </div>
+    </div>`; } },
+
+  ...CRISES.map((c, i) => ({ id: c.k, phase: 'kryzysy', live: true, steps: 1, html: st => {
+    const texts = answers('kryzys').filter(e => e.v && e.v.card === c.k).sort((a, b) => b.ts - a.ts).slice(0, st >= 1 ? 1 : 2);
+    return `
+    <div class="kicker">${esc(c.who)} · kryzys ${i + 1} z ${CRISES.length}</div>
+    <h1>${esc(c.t)}</h1>
+    <div class="body" style="font-size:34px;margin-top:18px">${esc(c.d)}</div>
+    <div class="box"><div class="lbl">Wasza zasada</div>${texts.length ? texts.map(t => '<div class="txt">' + esc(t.v.text) + '</div>').join('') : '<div class="txt empty">— nikt jeszcze nie wysłał —</div>'}</div>
+    ${st >= 1 ? '<div class="box sol"><div class="lbl">Jak to rozwiązały AA i NA</div><div class="txt">' + esc(c.s) + '</div></div>' : ''}
+    <div class="foot">Tradycje w omówieniu własnym, na podstawie: Dwanaście Kroków i Dwanaście Tradycji.</div>`; } })),
+
+  { id: 'debata', phase: 'debata', timer: 180, keys: { p: 180, P: 180, '3': 180, '2': 120, '1': 60 }, html: () => `
+    <div class="kicker">Debata · telefon</div>
+    <h1 class="q" style="font-size:50px">${MOTION}</h1>
+    <div class="row" style="margin-top:30px;flex:1">
+      <div class="col">
+        <ol class="rules" style="font-size:32px;margin-top:6px">
+          <li>3 min — przygotowanie w drużynach</li>
+          <li>2 min — mowa drużyny Za</li>
+          <li>2 min — mowa drużyny Przeciw</li>
+          <li>1 min — riposta Za</li>
+          <li>1 min — riposta Przeciw</li>
+        </ol>
+      </div>
+      <div style="flex:none;width:560px">
+        <div class="timer" id="timer" style="font-size:180px">3:00</div>
+        <div class="tbtns"><button data-t="180">3:00</button><button data-t="120">2:00</button><button data-t="60">1:00</button></div>
+        <div class="hint">Przycisk ustawia i uruchamia czas · T — start / pauza</div>
+      </div>
+    </div>
+    <div class="foot">Na telefonie: wybierz drużynę — zobaczysz swoje argumenty i źródła.</div>` },
+
+  { id: 'glos', phase: 'glos', live: true, steps: 1, html: st => {
+    const keys = ['tak', 'nie', 'zalezy'];
+    const c = countBy('glos', keys); const tot = keys.reduce((s, k) => s + c[k], 0);
+    return `
+    <div class="kicker">Głosowanie po debacie · telefon</div>
+    <h1 class="q" style="font-size:44px">${MOTION}</h1>
+    ${st < 1 ? '<div class="live"><b>' + tot + '</b>' + plural(tot, 'głos', 'głosy', 'głosów') + '</div><div class="foot">Następny klik pokaże wynik.</div>' :
+      hbar({ series: [{ name: 'Głosy', color: 'var(--s1)' }], legend: false, max: Math.max(1, ...keys.map(k => c[k])),
+        fmt: v => v + ' (' + pct(v, tot) + '%)',
+        groups: [{ label: 'Tak', values: [c.tak] }, { label: 'Nie', values: [c.nie] }, { label: 'To zależy', values: [c.zalezy] }] }) +
+      '<div class="foot">Liczba głosów, n = ' + tot + '.</div>'}`; } },
+
+  { id: 'mlodziez', phase: 'glos', html: () => `
+    <div class="kicker">Co mówią badania o młodzieży</div>
+    <h1>Nastolatek na mityngu</h1>
+    <ul class="plain" style="font-size:33px">
+      <li>Młodzi, którzy trafiają na mityngi z rówieśnikami, częściej uznają je za ważne i bardziej angażują się w program.<br><span class="dim" style="font-size:24px">Kelly, Myers, Brown (2005)</span></li>
+      <li>Nastolatki najbardziej cenią ogólne wsparcie grupy, a część odchodzi z poczuciem, że do niej nie pasuje.<br><span class="dim" style="font-size:24px">Kelly, Myers, Rodolico (2008)</span></li>
+      <li>U młodych dorosłych, którzy rzadko chodzą na mityngi, podobny wiek uczestników pomaga tuż po leczeniu, ale z czasem zaczyna szkodzić.<br><span class="dim" style="font-size:24px">Labbe i in. (2013)</span></li>
+    </ul>` },
+
+  { id: 'kontakty', phase: 'kontakty', html: () => `
+    <div class="kicker">Gdzie szukać pomocy · telefon</div>
+    <h1>Kontakty są już na waszych telefonach</h1>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:26px;margin-top:34px">
+      <div class="card"><span class="tag">Anonimowi Alkoholicy — infolinia</span><h3 style="font-size:44px">801 033 242</h3><p>tel./SMS: +48 727 777 989</p></div>
+      <div class="card"><span class="tag">Anonimowi Narkomani</span><h3 style="font-size:40px">anonimowinarkomani.org</h3><p>spis mityngów i kontakt</p></div>
+      <div class="card"><span class="tag">Al-Anon i Alateen — dla bliskich</span><h3 style="font-size:40px">al-anon.org.pl</h3><p>tel. 61 828 93 07 · Alateen: dla nastolatków</p></div>
+      <div class="card"><span class="tag">Telefon zaufania dla dzieci i młodzieży</span><h3 style="font-size:44px">116 111</h3><p>bezpłatny, anonimowy, całodobowy</p></div>
+    </div>` },
+
+  { id: 'q16b', phase: 'q16b', live: true, html: () => `
+    <div class="kicker">Pytanie na koniec · telefon</div>
+    <h1 class="q">${QUESTION16}</h1>
+    <div class="body" style="color:var(--ink2)">To samo pytanie co na początku.</div>
+    <div class="live"><b>${nAns('q16b')}</b>${odp(nAns('q16b'))} · na początku: ${nAns('q16a')}</div>` },
+
+  { id: 'przed-po', phase: 'q16b', live: true, steps: 1, html: st => {
+    const a = sixteenCounts('q16a'), b = sixteenCounts('q16b');
+    const ta = a.tak + a.nie + a.nie_wiem, tb = b.tak + b.nie + b.nie_wiem;
+    const series = [{ name: 'Na początku (n = ' + ta + ')', color: 'var(--s1)' }, { name: 'Na końcu (n = ' + tb + ')', color: 'var(--s2)' }];
+    if (st < 1) return `<div class="kicker">Przed i po</div><h1>Czy warto polecić grupę szesnastolatkowi?</h1>
+      <div class="live"><b>${tb}</b>${odp(tb)} na końcu · ${ta} na początku</div><div class="foot">Następny klik pokaże porównanie.</div>`;
+    const f = (v, i) => v + ' (' + pct(v, i === 0 ? ta : tb) + '%)';
+    return `<div class="kicker">Przed i po</div><h1>Czy warto polecić grupę szesnastolatkowi?</h1>
+      ${hbar({ series, max: Math.max(1, a.tak, a.nie, a.nie_wiem, b.tak, b.nie, b.nie_wiem), fmt: f,
+        groups: [{ label: 'Tak', values: [a.tak, b.tak] }, { label: 'Nie', values: [a.nie, b.nie] }, { label: 'Nie wiem', values: [a.nie_wiem, b.nie_wiem] }] })}
+      <div class="foot">Liczba osób i odsetek w danym pomiarze.</div>`; } },
+
+  { id: 'koniec', phase: 'koniec', html: () => `
+    <div class="row" style="height:100%;align-items:center">
+      <div class="col">
+        <div class="kicker">Zamknięcie</div>
+        <h1 style="font-size:84px">Runda: wynoszę…</h1>
+        <div class="sub">Jedno zdanie — co wynoszę z tego kręgu.</div>
+        <div class="big" style="margin-top:60px">Dziękuję.</div>
+      </div>
+      <div style="flex:none">${ring(460, 200, 12, 18, '#16181d')}</div>
+    </div>` },
+
+  { id: 'bibliografia', phase: 'koniec', html: () => `
+    <div class="kicker">Źródła</div>
+    <h1 style="font-size:52px">Bibliografia</h1>
+    <div class="biblio">${BIBLIO.map(b => '<p>' + b + '</p>').join('')}</div>` }
+];
+
+// ================= silnik prezentacji =================
+const stage = document.getElementById('stage');
+let idx = 0, step = 0;
+const TM = { total: 0, left: 0, running: false, last: 0 };
+
+function fit() {
+  const s = Math.min(innerWidth / 1600, innerHeight / 900);
+  stage.style.transform = 'translate(-50%,-50%) scale(' + s + ')';
+}
+addEventListener('resize', fit); fit();
+
+function timerSet(sec, start) { TM.total = sec; TM.left = sec; TM.running = !!start; TM.last = Date.now(); drawTimer(); }
+function timerToggle() { if (!TM.total) return; if (TM.left <= 0) TM.left = TM.total; TM.running = !TM.running; TM.last = Date.now(); drawTimer(); }
+function drawTimer() {
+  const el = document.getElementById('timer'); if (!el) return;
+  const s = Math.ceil(TM.left);
+  el.textContent = Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+  el.classList.toggle('run', TM.running);
+  el.classList.toggle('end', TM.total > 0 && TM.left <= 0);
+}
+setInterval(() => {
+  if (!TM.running) return;
+  const now = Date.now();
+  TM.left = Math.max(0, TM.left - (now - TM.last) / 1000); TM.last = now;
+  if (TM.left <= 0) TM.running = false;
+  drawTimer();
+}, 200);
+
+function render() {
+  const sl = SLIDES[idx];
+  stage.innerHTML = '<div class="slide">' + sl.html(step) + '</div>';
+  const t = document.getElementById('timer');
+  if (t) t.addEventListener('click', timerToggle);
+  stage.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => timerSet(Number(b.getAttribute('data-t')), true)));
+  drawTimer();
+  document.getElementById('pos').textContent = (idx + 1) + ' / ' + SLIDES.length;
+}
+let rTimer = null;
+function scheduleRender() {
+  if (!SLIDES[idx].live || rTimer) return;
+  rTimer = setTimeout(() => { rTimer = null; render(); }, 250);
+}
+function updateHash() { history.replaceState(null, '', location.pathname + location.search + '#' + (idx + 1) + (step ? '.' + step : '')); }
+function go(i, st) {
+  const changed = i !== idx;
+  idx = Math.max(0, Math.min(SLIDES.length - 1, i));
+  step = st || 0;
+  const sl = SLIDES[idx];
+  if (changed || !TM.total) { if (sl.timer) timerSet(sl.timer, false); else { TM.total = 0; TM.running = false; } }
+  render(); updateHash(); schedulePhase(sl.phase);
+}
+function next() { const sl = SLIDES[idx]; if (step < (sl.steps || 0)) { step++; render(); updateHash(); } else if (idx < SLIDES.length - 1) go(idx + 1, 0); }
+function prev() { if (step > 0) { step--; render(); updateHash(); } else if (idx > 0) go(idx - 1, SLIDES[idx - 1].steps || 0); }
+
+// ================= sterowanie telefonami =================
+let lastPhase = null, phaseTimer = null;
+const warn = document.getElementById('warn');
+function sendPhase(p, force) {
+  if (!p || (!force && p === lastPhase)) return;
+  publish(TOPIC_CTRL, { t: 'ph', p, n: Date.now() })
+    .then(() => { lastPhase = p; warn.classList.add('hidden'); panelUpdate(); })
+    .catch(() => { warn.textContent = 'Telefony nie dostały nowego ekranu — sprawdź internet i naciśnij N → „Wyślij ekran ponownie”.'; warn.classList.remove('hidden'); });
+}
+function schedulePhase(p) { clearTimeout(phaseTimer); phaseTimer = setTimeout(() => sendPhase(p), 600); }
+
+// ================= HUD i panel =================
+const hdot = document.getElementById('hdot'), hcount = document.getElementById('hcount');
+function updateHud() {
+  hdot.className = 'dot' + (conn === 'ok' ? ' ok' : conn === 'err' ? ' err' : '');
+  const n = nPeople();
+  hcount.textContent = n + ' ' + plural(n, 'osoba', 'osoby', 'osób') + (MOCK ? ' · próba' : '');
+  panelUpdate();
+}
+const panel = document.getElementById('panel');
+function panelUpdate() {
+  if (panel.classList.contains('hidden')) return;
+  const qs = [['q16a', 'Pytanie na start'], ['zgadnij', 'Zgadnij'], ['ocena', 'Ocena kręgów'], ['kryzys', 'Zasady z kryzysów'], ['glos', 'Głosowanie'], ['q16b', 'Pytanie na koniec']];
+  panel.innerHTML = '<h4>Panel prowadzącego</h4>' +
+    '<div>Kod kręgu: <code>' + CODE + '</code>' + (MOCK ? ' · <b>tryb próbny</b>' : '') + '</div>' +
+    '<div class="qrs">' + qrSvg(PART_URL, 180) + '</div>' +
+    '<div>Link dla uczestników:<br><code>' + esc(PART_SHORT) + '</code></div>' +
+    '<p>Połączenie: <b>' + (conn === 'ok' ? 'działa' : conn === 'err' ? 'brak' : 'łączę…') + '</b> · dołączyło: <b>' + nPeople() + '</b><br>Ekran na telefonach: <b>' + (lastPhase || '—') + '</b></p>' +
+    '<table>' + qs.map(([q, l]) => '<tr><td>' + l + '</td><td style="text-align:right"><b>' + nAns(q) + '</b></td></tr>').join('') + '</table>' +
+    '<button id="pResend">Wyślij ekran ponownie do telefonów</button>' +
+    '<button id="pRefresh">Odśwież wyniki</button>' +
+    '<button id="pOpen">Otwórz widok uczestnika w nowej karcie</button>' +
+    '<button id="pNew">Nowa sesja (nowy kod, puste wyniki)</button>' +
+    '<p style="color:#6b6a66;margin-top:10px">Klawisze: → / PageDown — dalej · ← — wstecz · F — pełny ekran · T — minutnik · N — ten panel</p>';
+  panel.querySelector('#pResend').onclick = () => sendPhase(SLIDES[idx].phase, true);
+  panel.querySelector('#pRefresh').onclick = () => { sub.refresh().then(() => render()).catch(() => {}); };
+  panel.querySelector('#pOpen').onclick = () => window.open(PART_URL, '_blank');
+  panel.querySelector('#pNew').onclick = () => {
+    if (!confirm('Zacząć nową sesję? Telefony będą musiały zeskanować nowy kod QR.')) return;
+    const p = new URLSearchParams(location.search); p.delete('s');
+    location.href = location.pathname + '?' + p.toString();
+  };
+}
+function togglePanel() { panel.classList.toggle('hidden'); panelUpdate(); }
+
+document.getElementById('prevB').onclick = e => { prev(); e.currentTarget.blur(); };
+document.getElementById('nextB').onclick = e => { next(); e.currentTarget.blur(); };
+document.getElementById('panelB').onclick = e => { togglePanel(); e.currentTarget.blur(); };
+
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); next(); return; }
+  if (['ArrowLeft', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); prev(); return; }
+  if (k === 'f' || k === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); return; }
+  if (k === 'n' || k === 'N') { togglePanel(); return; }
+  if (k === 't' || k === 'T') { timerToggle(); return; }
+  if (k === 'Home') { go(0, 0); return; }
+  if (k === 'End') { go(SLIDES.length - 1, 0); return; }
+  const sl = SLIDES[idx];
+  if (sl.keys && sl.keys[k]) timerSet(sl.keys[k], true);
+});
+
+// ================= start =================
+const sub = subscribe(TOPIC_ANS, onAnswer, s => { conn = s; updateHud(); });
+const m = /^#(\d+)(?:\.(\d+))?$/.exec(location.hash);
+idx = -1;
+go(m ? Number(m[1]) - 1 : 0, m && m[2] ? Number(m[2]) : 0);
+updateHud();
+})();
+</script>
+</body>
+</html>
