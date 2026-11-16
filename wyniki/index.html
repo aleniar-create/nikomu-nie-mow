@@ -1,0 +1,311 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="robots" content="noindex"><link rel="icon" href="data:,"></head><body><title>Nikomu nie mów: wyniki sali</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Strona wyników sali: ten sam wygląd co slajdy (kartka z dniem i godziną, tytuł, litery A–D na bursztynowych kaflach).
+   Na laptopie i rzutniku: scena 1920×1080 skalowana do okna. Na telefonie trzymanym pionowo: ta sama treść w jednej kolumnie. */
+:root{
+  color-scheme:dark;
+  --tlo:#07080b; --sadza:#0e1014; --noc:#14171f; --grafit:#232937; --stal:#3b4658; --mgla:#9aa5b3;
+  --papier:#e4dfc8; --papier-2:#cfc9b0; --tusz:#16181d; --tusz-2:#4a4840;
+  --prawo:#8fb4d3; --kuba:#e8b25a; --pieczec:#b4443c; --pieczec-j:#e56b5c; --ok:#74c48f;
+  --gra:"Jersey 10","VT323",ui-monospace,Menlo,Consolas,monospace;
+  /* rozmiary sceny 1920×1080 (krój gry jest ostry w wielokrotnościach 9,333 px) */
+  --bok:96px; --h1:112px; --h1w:120px; --etyk:46.667px; --etykw:50px; --licz:112px; --proc:46.667px; --maly:37.333px; --malyw:42px; --drobny:28px; --drobnyw:33px;
+  --kafel:108px; --litera:112px; --wiersz:132px; --odstep:21px; --slupek:24px; --kol-liczb:330px;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--tlo);color:var(--papier);font-family:var(--gra);overflow:hidden;-webkit-text-size-adjust:100%}
+p,h1,h2{margin:0;font-weight:400}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid var(--papier);outline-offset:3px}
+.nb{white-space:nowrap}
+#scena{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--s,1));background:var(--sadza);
+  display:flex;flex-direction:column;padding:54px var(--bok) 36px;overflow:hidden}
+/* góra: tytuł po lewej, kartka po prawej (jak na slajdach) */
+.gora{display:flex;justify-content:space-between;align-items:flex-start;gap:48px;min-height:186px;margin-bottom:12px}
+.gora h1{font-size:var(--h1);line-height:var(--h1w);margin-top:0}
+.gora h1.s84{font-size:84px;line-height:90px;margin-top:12px}
+.kal{flex:none;width:210px;margin-top:-24px;background:var(--papier);color:var(--tusz);text-align:center;box-shadow:9px 9px 0 rgba(0,0,0,.5)}
+.kal b{display:block;background:var(--pieczec);color:var(--papier);font-weight:400;font-size:37.333px;line-height:48px;position:relative}
+.kal b.dl{font-size:28px}
+.kal b::before,.kal b::after{content:"";position:absolute;top:12px;width:12px;height:12px;background:var(--sadza)}
+.kal b::before{left:18px}.kal b::after{right:18px}
+.kal i{display:block;font-style:normal;font-size:84px;line-height:84px;padding:6px 0}
+.kal s{display:block;text-decoration:none;background:var(--sadza);color:var(--papier);font-size:28px;line-height:36px;padding:3px 0}
+/* środek */
+#tresc{flex:1;min-height:0;display:flex;flex-direction:column}
+.wiersze{display:flex;flex-direction:column;gap:var(--odstep);list-style:none;margin:0;padding:0}
+.wiersz{display:grid;grid-template-columns:var(--kafel) minmax(0,1fr) var(--kol-liczb);grid-template-rows:1fr var(--slupek);grid-template-areas:"kafel etyk liczby" "kafel tor liczby";column-gap:30px;min-height:var(--wiersz)}
+.wiersz.bezkafla{grid-template-columns:minmax(0,1fr) var(--kol-liczb);grid-template-areas:"etyk liczby" "tor liczby"}
+.wiersz>b{grid-area:kafel;background:var(--kuba);color:var(--tusz);font-weight:400;font-size:var(--litera);line-height:var(--wiersz);text-align:center}
+.wiersz .etyk{grid-area:etyk;font-size:var(--etyk);line-height:var(--etykw);align-self:start;padding-top:2px;overflow-wrap:break-word}
+.wiersz .etyk i{font-style:normal;color:var(--mgla)}
+.wiersz .tor{grid-area:tor;background:var(--grafit);height:var(--slupek);align-self:end}
+.wiersz .tor u{display:block;height:100%;width:0;background:var(--kuba);text-decoration:none;transition:width .35s ease-out}
+.wiersz .liczby{grid-area:liczby;display:flex;align-items:baseline;justify-content:flex-end;gap:24px;align-self:center;white-space:nowrap}
+#tresc.ciasno{--etyk:37.333px;--etykw:40px}
+.wiersz .liczby strong{font-weight:400;font-size:var(--licz);line-height:var(--wiersz)}
+.wiersz .liczby span{font-size:var(--proc);color:var(--mgla);min-width:3.2ch;text-align:right}
+.czekam{font-size:var(--maly);line-height:var(--malyw);color:var(--mgla);margin-top:18px}
+.piatek{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 42px;margin-top:27px;font-size:var(--etyk);line-height:var(--etykw)}
+.piatek h2{font-size:var(--maly);line-height:var(--etykw);color:var(--mgla)}
+.piatek span b{font-weight:400;margin-left:15px;background:var(--papier);color:var(--tusz);padding:0 12px}
+/* ekran startowy */
+.kal.ile b{font-size:37.333px}
+.kal.ile s{font-size:28px}
+.zero{margin-top:auto;display:flex;flex-wrap:wrap;align-items:center;gap:12px 30px;font-size:var(--maly);line-height:var(--malyw);color:var(--mgla)}
+.zero .od{color:var(--papier)}
+.zero button.glowny{background:var(--kuba);color:var(--tusz);border:0;padding:6px 24px;font-size:var(--maly);line-height:var(--malyw);box-shadow:6px 6px 0 rgba(0,0,0,.6)}
+.zero button.glowny.pewnie{background:var(--pieczec-j)}
+.zero button.cichy{background:none;border:0;padding:0;color:var(--mgla);text-decoration:underline;font-size:var(--drobny);line-height:var(--malyw)}
+.zero .blad{color:var(--pieczec-j);flex-basis:100%}
+.podp{margin-top:15px;font-size:var(--drobny);line-height:var(--drobnyw);color:var(--mgla)}
+/* podsumowanie */
+.razem{display:grid;grid-template-columns:minmax(0,1.42fr) minmax(0,1fr);gap:0 72px;flex:1;min-height:0}
+.razem h2{font-size:var(--maly);line-height:var(--malyw);color:var(--mgla);margin-bottom:12px}
+.naj{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:15px}
+.naj li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;column-gap:24px;align-items:center;min-height:96px;border-bottom:3px solid var(--grafit);padding-bottom:12px}
+.naj .lit{display:flex;gap:6px}
+.naj .lit b{display:block;width:72px;height:84px;background:var(--kuba);color:var(--tusz);font-weight:400;font-size:74.667px;line-height:84px;text-align:center}
+.naj .lit b.brak{background:var(--grafit);color:var(--mgla)}
+.naj .co small{display:block;font-size:var(--drobny);line-height:var(--drobnyw);color:var(--mgla)}
+.naj .co span{display:block;font-size:var(--maly);line-height:var(--malyw)}
+.naj .ile{font-size:74.667px;line-height:84px;white-space:nowrap}
+.prawa>section+section{margin-top:36px}
+.koniec{display:flex;flex-direction:column;gap:18px;list-style:none;margin:0;padding:0}
+.koniec li{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-rows:auto var(--slupek);grid-template-areas:"etyk liczba" "tor liczba";column-gap:30px;row-gap:9px;align-items:end}
+.koniec .etyk{grid-area:etyk;font-size:var(--etyk);line-height:var(--etykw)}
+.koniec strong{grid-area:liczba;font-weight:400;font-size:74.667px;line-height:66px;align-self:center;min-width:1.2ch;text-align:right}
+.koniec .tor{grid-area:tor;background:var(--grafit);height:var(--slupek)}
+.koniec .tor u{display:block;height:100%;width:0;background:var(--kuba);transition:width .35s ease-out}
+.srednie{display:flex;flex-direction:column;gap:9px;list-style:none;margin:0;padding:0}
+.srednie li{display:flex;align-items:baseline;justify-content:space-between;gap:24px;font-size:var(--etyk);line-height:var(--etykw);border-bottom:3px solid var(--grafit);padding-bottom:6px}
+.srednie li span{display:flex;align-items:center;gap:18px}
+.srednie li span::before{content:"";flex:none;width:24px;height:24px;background:var(--zn,var(--papier))}
+.srednie li.l{--zn:var(--prawo)} .srednie li.k{--zn:var(--kuba)}
+.srednie li.o span::before{background:linear-gradient(90deg,var(--prawo) 50%,var(--kuba) 50%)}
+.srednie li b{font-weight:400;white-space:nowrap}
+.srednie li b small{font-size:var(--drobny);color:var(--mgla);margin-left:9px}
+/* dół: stan zliczania po lewej, połączenie i zakładki po prawej */
+.dol{display:flex;justify-content:space-between;align-items:center;gap:30px;margin-top:18px;min-height:60px}
+.dol #ile{font-size:var(--maly);line-height:var(--malyw);color:var(--mgla)}
+.dol #ile b{font-weight:400;color:var(--papier)}
+.dol .prawy{display:flex;align-items:center;gap:36px}
+#lacze{display:flex;align-items:center;gap:12px;font-size:var(--drobny);line-height:var(--drobnyw);color:var(--mgla);white-space:nowrap}
+#lacze i{width:18px;height:18px;background:var(--kuba)}
+#lacze.ok i{background:var(--ok)} #lacze.err i{background:var(--pieczec-j)}
+#lacze em{font-style:normal;background:var(--grafit);color:var(--papier);padding:0 12px;margin-left:6px}
+#zakladki{display:flex;gap:9px}
+#zakladki button{min-width:60px;height:54px;padding:0 15px;background:var(--noc);border:3px solid var(--stal);color:var(--mgla);font-size:var(--maly);line-height:46px}
+#zakladki button[aria-current="true"]{background:var(--kuba);border-color:var(--kuba);color:var(--tusz)}
+@media (prefers-reduced-motion:reduce){.wiersz .tor u,.koniec .tor u{transition:none}}
+/* telefon trzymany pionowo albo wąskie okno: jedna kolumna, strona się przewija */
+@media (max-aspect-ratio:1/1),(max-width:719px){
+  :root{--bok:16px; --h1:46.667px; --h1w:48px; --etyk:23px; --etykw:26px; --licz:46.667px; --proc:23px; --maly:23px; --malyw:27px; --drobny:19px; --drobnyw:23px;
+    --kafel:45px; --litera:46.667px; --wiersz:72px; --odstep:15px; --slupek:12px; --kol-liczb:96px}
+  html,body{height:auto;min-height:100%}
+  body{overflow:auto}
+  #scena{position:static;width:auto;height:auto;min-height:100vh;transform:none;padding:15px max(16px,env(safe-area-inset-right,0px)) 21px max(16px,env(safe-area-inset-left,0px))}
+  .gora{min-height:0;gap:15px;margin-bottom:18px}
+  .gora h1.s84{font-size:37.333px;line-height:39px;margin-top:0}
+  .kal{width:96px;margin-top:0;box-shadow:6px 6px 0 rgba(0,0,0,.5)}
+  .kal b,.kal.ile b{font-size:19px;line-height:24px}.kal b.dl{font-size:15px}
+  .kal b::before,.kal b::after{top:6px;width:6px;height:6px}.kal b::before{left:6px}.kal b::after{right:6px}
+  .kal i{font-size:37.333px;line-height:39px;padding:3px 0}
+  .kal s,.kal.ile s{font-size:15px;line-height:20px}
+  .wiersz{column-gap:12px}
+  #tresc.ciasno{--etyk:23px;--etykw:26px}
+  .wiersz .liczby{gap:9px}
+  .piatek{gap:6px 21px;margin-top:21px}.piatek span b{margin-left:9px;padding:0 6px}
+  .zero{margin-top:27px}
+  .razem{display:block}
+  .naj li{column-gap:12px;min-height:60px}
+  .naj .lit b{width:39px;height:48px;font-size:37.333px;line-height:48px}
+  .naj .ile{font-size:37.333px;line-height:42px}
+  .prawa{margin-top:27px}.prawa>section+section{margin-top:27px}
+  .koniec strong{font-size:37.333px;line-height:39px}
+  .srednie li span{gap:9px}.srednie li span::before{width:15px;height:15px}
+  .dol{flex-direction:column;align-items:flex-start;gap:15px;margin-top:27px}
+  .dol .prawy{flex-direction:column;align-items:flex-start;gap:12px;width:100%}
+  #zakladki{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:6px;width:100%}
+  #zakladki button{min-width:0;height:44px;padding:0;font-size:19px;line-height:38px}
+}
+</style>
+<div id="scena">
+  <header class="gora"><h1 id="h1"></h1><div class="kal" id="kal"><b></b><i></i><s></s></div></header>
+  <main id="tresc"></main>
+  <footer class="dol"><p id="ile"></p><div class="prawy"><span id="lacze"><i></i><b style="font-weight:400"></b></span><nav id="zakladki" aria-label="Ekrany wyników"></nav></div></footer>
+</div>
+<script>
+'use strict';
+const W={"url": "https://ntfy.sh/", "temat": "nnm-hg3sjyf6a4", "start": "Gdzie pracujesz?", "miejsca": {"S": "W szkole", "P": "W poradni na NFZ", "G": "W prywatnym gabinecie"}, "D": [{"id": "d1", "nr": 1, "dzien": "wtorek", "godz": "16:40", "nazwa": "Prośba Kuby", "pyt": "Co odpowiesz Kubie?", "kol": "prawo", "opcje": [{"k": "A", "t": "„Obiecuję. To zostaje między nami.”", "n": "", "kr": "„Obiecuję”"}, {"k": "B", "t": "„A czego się boisz, jeśli ktoś się dowie?”", "n": "", "kr": "„Czego się boisz?”"}, {"k": "C", "t": "„To zostaje między nami, poza kilkoma wyjątkami.”", "n": "Mówisz, jakie to wyjątki.", "kr": "„Poza wyjątkami”"}, {"k": "D", "t": "„Tego nie mogę obiecać. Poprośmy mamę i porozmawiajmy we troje.”", "n": "", "kr": "„Poprośmy mamę”"}], "oceny": {"A": {"L": "ok", "K": "no"}, "B": {"L": "ok", "K": "no"}, "C": {"L": "ok", "K": "ok"}, "D": {"L": "q", "K": "q"}}}, {"id": "d2", "nr": 2, "dzien": "wtorek", "godz": "19:10", "nazwa": "Notatka", "pyt": "Co wpiszesz do dokumentacji?", "kol": "miejsca", "opcje": [{"k": "A", "t": "Tylko to, że pali i jak często. O reszcie nic.", "n": "", "kr": "Tylko to, że pali"}, {"k": "B", "t": "Wszystko, słowami Kuby. Także sprzedaż i marihuanę taty.", "n": "", "kr": "Wszystko, słowami Kuby"}, {"k": "C", "t": "Jedno zdanie do dokumentacji. Reszta w prywatnym zeszycie.", "n": "", "kr": "Jedno zdanie + prywatny zeszyt"}, {"k": "D", "t": "To, co ważne dla terapii. Bez słów Kuby o sprzedaży i o marihuanie taty.", "n": "", "kr": "To, co ważne dla terapii"}], "oceny": {"A": {"S": "ok", "P": "ok", "G": "ok", "K": "q"}, "B": {"S": "q", "P": "no", "G": "ok", "K": "no"}, "C": {"S": "q", "P": "q", "G": "ok", "K": "q"}, "D": {"S": "ok", "P": "ok", "G": "ok", "K": "ok"}}}, {"id": "d3", "nr": 3, "dzien": "czwartek", "godz": "12:15", "nazwa": "Telefon mamy", "pyt": "Co odpowiesz mamie Kuby?", "kol": "prawo", "opcje": [{"k": "A", "t": "„O tym, co mówi mi Kuba, nie mogę rozmawiać.”", "n": "", "kr": "„Nie mogę o tym rozmawiać”"}, {"k": "B", "t": "„Nie przez telefon. Proszę przyjść razem z Kubą.”", "n": "", "kr": "„Nie przez telefon, razem z Kubą”"}, {"k": "C", "t": "Mówię jej wszystko, co wiem.", "n": "", "kr": "Mówię mamie wszystko"}, {"k": "D", "t": "„Leki zawsze warto trzymać pod kluczem.”", "n": "Nic więcej nie mówisz.", "kr": "„Leki warto zamknąć”"}], "oceny": {"A": {"L": "q", "K": "q"}, "B": {"L": "ok", "K": "ok"}, "C": {"L": "q", "K": "no"}, "D": {"L": "q", "K": "q"}}}, {"id": "d4", "nr": 4, "dzien": "piątek", "godz": "21:40", "nazwa": "SMS od Kuby", "pyt": "Co zrobisz po tym SMS-ie?", "kol": "prawo", "opcje": [{"k": "A", "t": "Dzwonię pod numer alarmowy 112.", "n": "", "kr": "Dzwonię pod 112"}, {"k": "B", "t": "Dzwonię do Kuby.", "n": "", "kr": "Dzwonię do Kuby"}, {"k": "C", "t": "Odkładam telefon. Porozmawiamy we wtorek.", "n": "", "kr": "Odkładam telefon"}, {"k": "D", "t": "Dzwonię do jego mamy.", "n": "", "kr": "Dzwonię do mamy Kuby"}], "oceny": {"A": {"L": "ok", "K": "q"}, "B": {"L": "ok", "K": "q"}, "C": {"L": "ok", "K": "no"}, "D": {"L": "ok", "K": "q"}}}, {"id": "d5", "nr": 5, "dzien": "poniedziałek", "godz": "9:05", "nazwa": "Policjant w drzwiach", "pyt": "Co odpowiesz policjantowi?", "kol": "miejsca", "opcje": [{"k": "A", "t": "Odmawiam zeznań. Także wtedy, gdy prokurator zwolni mnie z tajemnicy.", "n": "", "kr": "Odmawiam zeznań, nawet po zwolnieniu z tajemnicy"}, {"k": "B", "t": "Oddaję dokumenty i mówię wszystko. To przecież prokurator.", "n": "", "kr": "Oddaję dokumenty i mówię wszystko"}, {"k": "C", "t": "Niszczę notatkę z wtorku.", "n": "", "kr": "Niszczę notatkę"}, {"k": "D", "t": "Dokumenty w zapieczętowanej kopercie. Zeznania dopiero po zwolnieniu z tajemnicy.", "n": "", "kr": "Dokumenty w kopercie, zeznania po zwolnieniu z tajemnicy"}], "oceny": {"A": {"S": "no", "P": "ok", "G": "no", "K": "ok"}, "B": {"S": "no", "P": "no", "G": "no", "K": "no"}, "C": {"S": "no", "P": "no", "G": "no", "K": "q"}, "D": {"S": "ok", "P": "ok", "G": "ok", "K": "ok"}}}], "los": {"F1": "kontrola policji", "F2": "wypadek", "F3": "spokojny powrót"}, "kropki": ["wtorek, 16:40", "wtorek, 19:10", "czwartek, 12:15", "piątek, 21:40", "poniedziałek, 9:05"], "epi": {"dzien": "wtorek", "godz": "16:40", "plus": "Kuba pisze do ciebie.", "minus": "Kuba nie przyszedł.", "licznik": ["Zgodne z prawem", "Dobre dla Kuby", "Jedno i drugie naraz"]}};
+// polska typografia jak w grze: jednoliterowe spójniki i przyimki nie zostają na końcu wiersza
+(function typ(o){for(const k in o){const v=o[k];
+  if(typeof v==='string'&&k!=='url'&&k!=='temat'&&k!=='id'&&k!=='k')o[k]=v.replace(/(^|[\s(„])([aiouwzAIOUWZ])[ \t\n]+(?=\S)/g,'$1$2 ').replace(/(^|[\s(„])([aiouwzAIOUWZ])[ \t\n]+(?=\S)/g,'$1$2 ')
+    .replace(/(e-papieros[a-ząćęłńóśźż]*|HHCP-O|SMS-ie)/g,'<span class="nb">$1</span>');
+  else if(v&&typeof v==='object')typ(v)}})(W);
+const QS=new URLSearchParams(location.search);
+const MOCK=QS.get('mock')==='1', KANAL=/^[a-z0-9]{3,12}$/.test(QS.get('kanal')||'')?QS.get('kanal'):'';
+const TEMAT=W.temat+'-'+(KANAL||'a');
+const IDS=W.D.map(d=>d.id), LIT=['A','B','C','D'], MIEJSCA=['S','P','G'], LOSY=['F1','F2','F3'];
+const $=id=>document.getElementById(id);
+const bezp=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const telM=n=>n===1?'telefon':(n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?'telefony':'telefonów');   // 1 telefon, 2 telefony, 5 telefonów
+const telD=n=>n===1?'telefonu':'telefonów';                                                        // z 1 telefonu, z 24 telefonów
+const proc=(c,a)=>a?Math.round(100*c/a):0;
+const przec=x=>x.toFixed(1).replace('.',',');
+
+/* ---------- dane z sali ----------
+   Telefony wysyłają wiadomości z całym dotychczasowym zapisem (zob. gra: „zliczanie odpowiedzi sali”).
+   Dla każdego telefonu liczy się jego najnowsza wiadomość. Wiadomość „nnm0” to znacznik „zacznij od zera”:
+   liczą się tylko wiadomości, które przyszły po ostatnim znaczniku. Wiadomość „nnm1” cofa wskazany znacznik.
+   Zerowanie i cofnięcie leżą na tym samym kanale co odpowiedzi, więc widzi je każda otwarta strona wyników. */
+const widziane=new Set(), wiadomosci=[], znaczniki=[], cofniete=new Set();
+let kolejny=0;
+function przyjmij(m){
+  if(!m||m.event!=='message'||typeof m.id!=='string'||widziane.has(m.id))return false;
+  widziane.add(m.id);
+  let d;try{d=JSON.parse(m.message)}catch(e){return false}
+  if(!d||typeof d!=='object')return false;
+  const time=Number(m.time)||0, seq=kolejny++;
+  if(d.t==='nnm0'){znaczniki.push({id:m.id,time,seq});return true}
+  if(d.t==='nnm1'){if(typeof d.z==='string')cofniete.add(d.z);return true}
+  if(d.t!=='nnm'||d.v!==1||typeof d.pid!=='string'||!/^[a-z0-9]{6,16}$/.test(d.pid)||!Number.isFinite(d.c)||!Number.isFinite(d.n)||wiadomosci.length>=4000)return false;
+  const w={};if(d.w&&typeof d.w==='object')for(const id of IDS)if(LIT.includes(d.w[id]))w[id]=d.w[id];
+  wiadomosci.push({pid:d.pid,c:d.c,n:d.n,time,seq,m:MIEJSCA.includes(d.m)?d.m:null,w,f:LOSY.includes(d.f)?d.f:null,
+    e:(d.e&&typeof d.e==='object'&&(d.e.p===0||d.e.p===1))?{p:d.e.p,s:d.e.s===1?1:0}:null});
+  return true}
+function granica(){let g=null;for(const z of znaczniki)if(!cofniete.has(z.id)&&(!g||z.time>g.time||(z.time===g.time&&z.seq>g.seq)))g=z;return g}
+function policz(){
+  const g=granica(), naj=new Map();
+  for(const x of wiadomosci){
+    if(g&&(x.time<g.time||(x.time===g.time&&x.seq<g.seq)))continue;
+    const b=naj.get(x.pid);if(!b||x.c>b.c||(x.c===b.c&&x.n>=b.n))naj.set(x.pid,x)}
+  const tel=[...naj.values()].filter(x=>x.m).slice(0,1000);
+  const wyn={g,n:tel.length,miejsca:{S:0,P:0,G:0},dec:{},los:{F1:0,F2:0,F3:0},kon:{n:0,plus:0,minus:0,pismo:0,l:0,k:0,o:0}};
+  for(const d of W.D)wyn.dec[d.id]={a:0,A:0,B:0,C:0,D:0};
+  for(const x of tel){wyn.miejsca[x.m]++;
+    for(const d of W.D){const k=x.w[d.id];if(k){wyn.dec[d.id].a++;wyn.dec[d.id][k]++}}
+    if(x.w.d4&&x.f)wyn.los[x.f]++;
+    if(IDS.every(id=>x.w[id])&&x.e){const K=wyn.kon;K.n++;if(x.e.p)K.plus++;else K.minus++;if(x.e.s)K.pismo++;
+      for(const d of W.D){const o=d.oceny[x.w[d.id]],L=d.kol==='miejsca'?o[x.m]:o.L;       // tak samo jak liczniki na telefonie
+        if(L==='ok')K.l++;if(o.K==='ok')K.k++;if(L==='ok'&&o.K==='ok')K.o++}}}
+  return wyn}
+
+/* ---------- połączenie: ntfy.sh (jak w aplikacji warsztatowej) albo tryb próbny w tej samej przeglądarce ---------- */
+let lacze='conn', ostatniZnak=0, es=null, zegarSondy=null, odstepSondy=5000, kiedyPolacz=0;
+const podstawa=W.url+TEMAT;
+function stanLacza(s){if(lacze!==s){lacze=s;rysujStan()}}
+function nowe(lista){let zm=false;for(const m of lista)if(przyjmij(m))zm=true;if(zm)odswiez()}
+function sonda(){   // jednorazowe pobranie wszystkiego, co serwer pamięta (zapas, gdy sieć nie przepuszcza odbioru na żywo)
+  if(MOCK){let l=[];try{l=JSON.parse(localStorage.getItem('nnm-mock:'+TEMAT)||'[]')}catch(e){}nowe(l);return Promise.resolve(true)}
+  return fetch(podstawa+'/json?poll=1&since=all').then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.text()})
+    .then(t=>{const l=[];for(const w of t.split('\n'))if(w.trim()){try{l.push(JSON.parse(w))}catch(e){}}nowe(l);return true})}
+function planSondy(){clearTimeout(zegarSondy);zegarSondy=setTimeout(()=>{
+  if(lacze==='ok'&&Date.now()-ostatniZnak<100000){planSondy();return}     // odbiór na żywo działa: serwer odzywa się co ok. 45 s
+  sonda().then(()=>{odstepSondy=15000;if(lacze!=='ok')stanLacza('sonda')},()=>{odstepSondy=60000;stanLacza('err')}).then(planSondy);
+  if((!es||es.readyState===2||Date.now()-ostatniZnak>=100000)&&Date.now()-kiedyPolacz>=60000)polacz()},odstepSondy)}   // serwer liczy żądania: bez pośpiechu
+function polacz(){
+  try{if(es)es.close()}catch(e){}
+  kiedyPolacz=Date.now();if(typeof EventSource==='undefined'){es=null;return}
+  es=new EventSource(podstawa+'/sse?since=all');ostatniZnak=Date.now();
+  const zyje=()=>{ostatniZnak=Date.now();stanLacza('ok')};
+  es.onopen=zyje;es.addEventListener('keepalive',zyje);
+  es.onmessage=e=>{zyje();try{nowe([JSON.parse(e.data)])}catch(_){}};
+  es.onerror=()=>{if(lacze==='ok'||lacze==='conn')stanLacza(es.readyState===2?'err':'conn')}}
+function sluchaj(){
+  if(MOCK){sonda();stanLacza('ok');
+    try{new BroadcastChannel('nnm-mock').addEventListener('message',e=>{if(e.data&&e.data.topic===TEMAT)nowe([e.data])})}catch(e){}
+    addEventListener('storage',e=>{if(e.key==='nnm-mock:'+TEMAT)sonda()});return}
+  polacz();planSondy();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)sonda().catch(()=>{})})}   // po powrocie z programu ze slajdami: upewnij się, że wynik jest aktualny
+function nadaj(obj){
+  const tresc=JSON.stringify(obj);
+  if(MOCK){const w={id:Math.random().toString(36).slice(2),time:Math.floor(Date.now()/1000),event:'message',topic:TEMAT,message:tresc};let l=[];
+    try{l=JSON.parse(localStorage.getItem('nnm-mock:'+TEMAT)||'[]')}catch(e){}
+    l.push(w);localStorage.setItem('nnm-mock:'+TEMAT,JSON.stringify(l));
+    try{const bc=new BroadcastChannel('nnm-mock');bc.postMessage(w);bc.close()}catch(e){}
+    return Promise.resolve(w)}
+  return fetch(podstawa,{method:'POST',body:tresc}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})}
+
+/* ---------- ekrany ---------- */
+const EKRANY=['start',...IDS,'razem'], NAZWY=['Start',...W.D.map(d=>String(d.nr)),'Razem'];
+let ekran=0, zero={pewnie:false,blad:false,wtoku:false}, zbudowany=null;
+const tresc=$('tresc');
+function kiedy(t){const d=new Date(t*1000),dzis=new Date(),hm=d.toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'});
+  return d.toDateString()===dzis.toDateString()?'dziś, '+hm:d.toLocaleDateString('pl-PL',{day:'numeric',month:'numeric'})+', '+hm}
+function kartka(gora,srodek,dol,ile){const k=$('kal');k.className='kal'+(ile?' ile':'');
+  k.children[0].textContent=gora;k.children[0].className=gora.length>8?'dl':'';k.children[1].textContent=srodek;k.children[2].textContent=dol}
+function wierszHtml(lit,etyk,dop,id){return `<li class="wiersz${lit?'':' bezkafla'}" id="w-${id}">${lit?`<b>${lit}</b>`:''}<p class="etyk">${etyk}${dop?` <i>${dop}</i>`:''}</p>
+  <div class="liczby"><strong>0</strong><span>0%</span></div><div class="tor" aria-hidden="true"><u></u></div></li>`}
+function ustawWiersz(id,c,a){const w=$('w-'+id);if(!w)return;const p=proc(c,a);
+  w.querySelector('strong').textContent=c;w.querySelector('.liczby span').textContent=p+'%';w.querySelector('.tor u').style.width=(a?100*c/a:0)+'%';
+  w.title=`${c} z ${a} ${telD(a)} (${p}%)`}
+function buduj(){const e=EKRANY[ekran],h1=$('h1');zbudowany=e;h1.className='';
+  if(e==='start'){h1.innerHTML=W.start;
+    tresc.innerHTML=`<ul class="wiersze">${MIEJSCA.map(m=>wierszHtml('',W.miejsca[m],'',m)).join('')}</ul><p class="czekam" id="czekam" hidden>Czekam na pierwsze telefony.</p>
+      <div class="zero" id="zero"></div><p class="podp">Strzałki ← → zmieniają ekran. Klawisz F włącza pełny ekran.</p>`}
+  else if(e==='razem'){h1.innerHTML='Jak odpowiadała sala';
+    tresc.innerHTML=`<div class="razem"><section><h2>Najczęstsza odpowiedź</h2><ol class="naj">${W.D.map((d,i)=>`<li id="n-${d.id}"><div class="lit"></div><div class="co"><small>${W.kropki[i]}: ${d.nazwa}</small><span></span></div><div class="ile"></div></li>`).join('')}</ol></section>
+      <div class="prawa"><section><h2>Jak skończył się tydzień</h2><ul class="koniec">${[['plus',W.epi.plus],['minus',W.epi.minus]].map(([k,t])=>`<li id="k-${k}"><p class="etyk">${t}</p><strong>0</strong><div class="tor" aria-hidden="true"><u></u></div></li>`).join('')}</ul></section>
+      <section><h2>Średnio w sali</h2><ul class="srednie">${['l','k','o'].map((k,i)=>`<li class="${k}" id="s-${k}"><span>${W.epi.licznik[i]}</span><b>—</b></li>`).join('')}</ul></section></div></div>`}
+  else{const d=W.D[ekran-1];h1.innerHTML=d.pyt;
+    tresc.innerHTML=`<ol class="wiersze">${d.opcje.map(o=>wierszHtml(o.k,o.t,o.n,o.k)).join('')}</ol><p class="czekam" id="czekam" hidden>Czekam na pierwsze odpowiedzi.</p>`+
+      (d.id==='d4'?`<div class="piatek" id="piatek"><h2>Jak skończył się piątek:</h2>${LOSY.map(f=>`<span>${W.los[f]}<b id="l-${f}">0</b></span>`).join('')}</div>`:'')}
+  // tytuł, który nie mieści się w jednym wierszu obok kartki, dostaje mniejszy krój; za długie odpowiedzi też
+  if(h1.offsetHeight>(parseFloat(getComputedStyle(h1).lineHeight)||120)*1.5)h1.className='s84';
+  tresc.className='';if(!waski()&&tresc.scrollHeight>tresc.clientHeight+1)tresc.className='ciasno';
+  $('zakladki').innerHTML=NAZWY.map((n,i)=>`<button type="button" data-e="${i}" aria-current="${i===ekran}">${n}</button>`).join('')}
+function rysujZero(wyn){const z=$('zero');if(!z)return;const g=wyn.g,podpis=[g&&g.id,zero.pewnie,zero.blad,zero.wtoku].join('|');
+  if(z.dataset.p===podpis)return;z.dataset.p=podpis;
+  z.innerHTML=`<span class="od">${g?'Liczę odpowiedzi od: '+kiedy(g.time)+'.':'Liczę wszystkie odpowiedzi z ostatnich 12 godzin.'}</span>
+    <button type="button" class="glowny${zero.pewnie?' pewnie':''}" id="b-zero"${zero.wtoku?' disabled':''}>${zero.wtoku?'Chwila…':zero.pewnie?'Na pewno? Kliknij jeszcze raz':'Zacznij liczyć od zera'}</button>
+    ${g&&!zero.wtoku?'<button type="button" class="cichy" id="b-cofnij">Cofnij zerowanie</button>':''}
+    ${zero.blad?'<span class="blad">Nie udało się. Sprawdź internet i spróbuj jeszcze raz.</span>':''}`}
+function rysujStan(){const l=$('lacze');l.className=lacze==='ok'||lacze==='sonda'?'ok':lacze==='err'?'err':'';
+  l.children[1].innerHTML=(lacze==='ok'?'połączono':lacze==='sonda'?'połączono (odświeżanie co 15 s)':lacze==='err'?'brak połączenia':'łączę…')+(MOCK?'<em>tryb próbny</em>':KANAL?`<em>kanał próbny: ${bezp(KANAL)}</em>`:'')}
+function odswiez(){if(odswiez.czeka)return;odswiez.czeka=true;requestAnimationFrame(()=>{odswiez.czeka=false;rysuj()})}
+function rysuj(){const e=EKRANY[ekran];if(zbudowany!==e)buduj();const wyn=policz(),ile=$('ile'),cz=$('czekam');
+  if(e==='start'){kartka('w grze',String(wyn.n),telM(wyn.n),true);
+    for(const m of MIEJSCA)ustawWiersz(m,wyn.miejsca[m],wyn.n);
+    if(cz)cz.hidden=wyn.n>0;rysujZero(wyn);ile.innerHTML=''}
+  else if(e==='razem'){kartka(W.epi.dzien,W.epi.godz,'tydzień później');const K=wyn.kon;
+    W.D.forEach(d=>{const s=wyn.dec[d.id],li=$('n-'+d.id),max=Math.max(...LIT.map(k=>s[k])),top=s.a?LIT.filter(k=>s[k]===max):[];
+      li.querySelector('.lit').innerHTML=top.length?top.map(k=>`<b>${k}</b>`).join(''):'<b class="brak">?</b>';
+      li.querySelector('.co span').innerHTML=!top.length?'jeszcze nikt nie odpowiedział':top.length===1?d.opcje.find(o=>o.k===top[0]).kr:(top.length===2?'dwie odpowiedzi':top.length===3?'trzy odpowiedzi':'cztery odpowiedzi')+' po równo';
+      li.querySelector('.ile').textContent=top.length?proc(max,s.a)+'%':''});
+    for(const k of ['plus','minus']){const li=$('k-'+k);li.querySelector('strong').textContent=K[k];li.querySelector('.tor u').style.width=(K.n?100*K[k]/K.n:0)+'%';li.title=`${K[k]} z ${K.n} ${telD(K.n)} (${proc(K[k],K.n)}%)`}
+    for(const k of ['l','k','o'])$('s-'+k).querySelector('b').innerHTML=K.n?przec(K[k]/K.n)+'<small>z 5</small>':'—';
+    ile.innerHTML=`Do końca gry: <b>${K.n}</b> z ${wyn.n} ${telD(wyn.n)}`}
+  else{const d=W.D[ekran-1],s=wyn.dec[d.id];kartka(d.dzien,d.godz,`decyzja ${d.nr} z 5`);
+    for(const k of LIT)ustawWiersz(k,s[k],s.a);
+    if(cz)cz.hidden=s.a>0;
+    if(d.id==='d4')for(const f of LOSY)$('l-'+f).textContent=wyn.los[f];
+    ile.innerHTML=`Odpowiedzi: <b>${s.a}</b> z ${wyn.n} ${telD(wyn.n)}`}}
+function idz(i){ekran=Math.max(0,Math.min(EKRANY.length-1,i));zero.pewnie=false;zero.blad=false;try{history.replaceState(null,'',location.pathname+location.search+'#'+ekran)}catch(e){}rysuj()}
+function pelny(){try{if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}catch(e){}}
+function zeruj(){
+  if(!zero.pewnie){zero.pewnie=true;zero.blad=false;rysuj();$('b-zero').focus();return}
+  zero.pewnie=false;zero.wtoku=true;zero.blad=false;rysuj();
+  nadaj({t:'nnm0',n:Math.random().toString(36).slice(2,10)}).then(m=>{zero.wtoku=false;if(m&&m.id)nowe([m]);rysuj()},()=>{zero.wtoku=false;zero.blad=true;rysuj()})}
+function cofnij(){const g=granica();if(!g||zero.wtoku)return;zero.pewnie=false;zero.wtoku=true;zero.blad=false;rysuj();
+  nadaj({t:'nnm1',z:g.id}).then(m=>{zero.wtoku=false;if(m&&m.id)nowe([m]);rysuj()},()=>{zero.wtoku=false;zero.blad=true;rysuj()})}
+document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;
+  if(b.dataset.e!==undefined){idz(Number(b.dataset.e));const n=document.querySelector('#zakladki button[aria-current="true"]');if(n)n.focus()}
+  else if(b.id==='b-zero')zeruj();else if(b.id==='b-cofnij')cofnij()});
+document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key;
+  if(k==='ArrowRight'||k==='PageDown'){e.preventDefault();idz(ekran+1)}
+  else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();idz(ekran-1)}
+  else if(k==='Home')idz(0);else if(k==='End')idz(EKRANY.length-1);
+  else if(/^[0-6]$/.test(k))idz(Number(k));
+  else if(k==='f'||k==='F')pelny()});
+const waski=()=>matchMedia('(max-aspect-ratio:1/1),(max-width:719px)').matches;
+function skala(){document.documentElement.style.setProperty('--s',Math.min(innerWidth/1920,innerHeight/1080))}
+addEventListener('resize',skala);skala();
+const h=/^#([0-6])$/.exec(location.hash);ekran=h?Number(h[1]):0;
+rysuj();rysujStan();sluchaj();
+(document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(()=>{zbudowany=null;rysuj()});   // po wczytaniu kroju: ponowny pomiar tytułu
+window.__wyniki=()=>policz();
+</script>
+</body></html>
