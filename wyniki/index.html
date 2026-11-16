@@ -178,12 +178,13 @@ function przyjmij(m){
   return true}
 function granica(){let g=null;for(const z of znaczniki)if(!cofniete.has(z.id)&&(!g||z.time>g.time||(z.time===g.time&&z.seq>g.seq)))g=z;return g}
 function policz(){
-  const g=granica(), naj=new Map();
+  const g=granica(), naj=new Map();let ost=0;
   for(const x of wiadomosci){
     if(g&&(x.time<g.time||(x.time===g.time&&x.seq<g.seq)))continue;
+    if(x.m&&x.time>ost)ost=x.time;
     const b=naj.get(x.pid);if(!b||x.c>b.c||(x.c===b.c&&x.n>=b.n))naj.set(x.pid,x)}
   const tel=[...naj.values()].filter(x=>x.m).slice(0,1000);
-  const wyn={g,n:tel.length,miejsca:{S:0,P:0,G:0},dec:{},los:{F1:0,F2:0,F3:0},kon:{n:0,plus:0,minus:0,pismo:0,l:0,k:0,o:0}};
+  const wyn={g,ost,n:tel.length,miejsca:{S:0,P:0,G:0},dec:{},los:{F1:0,F2:0,F3:0},kon:{n:0,plus:0,minus:0,pismo:0,l:0,k:0,o:0}};
   for(const d of W.D)wyn.dec[d.id]={a:0,A:0,B:0,C:0,D:0};
   for(const x of tel){wyn.miejsca[x.m]++;
     for(const d of W.D){const k=x.w[d.id];if(k){wyn.dec[d.id].a++;wyn.dec[d.id][k]++}}
@@ -258,8 +259,10 @@ function buduj(){const e=EKRANY[ekran],h1=$('h1');zbudowany=e;h1.className='';
   tresc.className='';if(!waski()&&tresc.scrollHeight>tresc.clientHeight+1)tresc.className='ciasno';
   $('zakladki').innerHTML=NAZWY.map((n,i)=>`<button type="button" data-e="${i}" aria-current="${i===ekran}">${n}</button>`).join('')}
 function rysujZero(wyn){const z=$('zero');if(!z)return;const g=wyn.g,podpis=[g&&g.id,zero.pewnie,zero.blad,zero.wtoku].join('|');
-  if(z.dataset.p===podpis)return;z.dataset.p=podpis;
-  z.innerHTML=`<span class="od">${g?'Liczę odpowiedzi od: '+kiedy(g.time)+'.':'Liczę wszystkie odpowiedzi z ostatnich 12 godzin.'}</span>
+  const od=(g?'Liczę odpowiedzi od: '+kiedy(g.time)+'.':'Liczę wszystkie odpowiedzi z ostatnich 12 godzin.')+(wyn.ost?' Ostatnia odpowiedź: '+kiedy(wyn.ost)+'.':'');
+  if(z.dataset.p===podpis){const e=z.querySelector('.od');if(e.textContent!==od)e.textContent=od;return}
+  z.dataset.p=podpis;
+  z.innerHTML=`<span class="od">${od}</span>
     <button type="button" class="glowny${zero.pewnie?' pewnie':''}" id="b-zero"${zero.wtoku?' disabled':''}>${zero.wtoku?'Chwila…':zero.pewnie?'Na pewno? Kliknij jeszcze raz':'Zacznij liczyć od zera'}</button>
     ${g&&!zero.wtoku?'<button type="button" class="cichy" id="b-cofnij">Cofnij zerowanie</button>':''}
     ${zero.blad?'<span class="blad">Nie udało się. Sprawdź internet i spróbuj jeszcze raz.</span>':''}`}
@@ -295,7 +298,7 @@ document.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)r
   if(b.dataset.e!==undefined){idz(Number(b.dataset.e));const n=document.querySelector('#zakladki button[aria-current="true"]');if(n)n.focus()}
   else if(b.id==='b-zero')zeruj();else if(b.id==='b-cofnij')cofnij()});
 document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key;
-  if(k==='ArrowRight'||k==='PageDown'){e.preventDefault();idz(ekran+1)}
+  if(k==='ArrowRight'||k==='PageDown'||(k===' '&&!(document.activeElement&&document.activeElement.tagName==='BUTTON'))){e.preventDefault();idz(ekran+1)}   // strzałka, pilot do slajdów, spacja
   else if(k==='ArrowLeft'||k==='PageUp'){e.preventDefault();idz(ekran-1)}
   else if(k==='Home')idz(0);else if(k==='End')idz(EKRANY.length-1);
   else if(/^[0-6]$/.test(k))idz(Number(k));
