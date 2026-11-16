@@ -248,28 +248,33 @@ function wybierz(id,k){const m=st.m;
    Telefon wysyła anonimowo: losowy identyfikator urządzenia, miejsce pracy, pierwszą odpowiedź na każdą z pięciu decyzji,
    wylosowane zakończenie piątku i to, jak skończył się tydzień. Bez imienia, konta i numeru telefonu.
    Każda wiadomość zawiera cały dotychczasowy zapis, więc zgubiona wiadomość naprawia się przy następnej.
-   W jednym „głosowaniu” (STAT.cykl godzin) liczy się pierwsza odpowiedź na każdą decyzję; powtórne przejście gry nie jest wysyłane.
+   W jednym „głosowaniu” liczy się pierwsza odpowiedź na każdą decyzję; powtórne przejście gry nie jest wysyłane.
+   Nowe głosowanie zaczyna się, gdy prowadzący wyzerował wyniki (telefon sprawdza to przy starcie kolejnej gry) albo po STAT.cykl godzinach.
    Gdy wysyłka zawiedzie, gra działa dalej bez zmian. Wyniki pokazuje strona wyniki/ (src/wyniki.tpl.html).
    Serwis ntfy.sh ogranicza liczbę żądań z jednego adresu, dlatego telefon nie ponawia w kółko:
    po trzech odmowach serwera albo dwunastu nieudanych połączeniach przestaje (do ponownego otwarcia strony albo powrotu sieci). */
 const stat=(()=>{
-  if(!STAT||typeof fetch!=='function')return {zglos(){},pchnij(){},stan:()=>null};
+  if(!STAT||typeof fetch!=='function')return {zglos(){},pchnij(){},nowaGra(){},stan:()=>null};
   const KL='nnm-stat',temat=STAT.temat+'-'+(KANAL||'a'),IDS=['d1','d2','d3','d4','d5'];
-  let s=null,wLocie=false,proby=0,odmowy=0,bledy=0,pauza=0,zegar=null;
+  let s=null,wLocie=false,proby=0,odmowy=0,bledy=0,pauza=0,zegar=null,spr={trzeba:false,proby:0,wtoku:false};
   const teraz=()=>Math.floor(Date.now()/1000);
   const pusty=()=>({m:null,w:{},f:null,e:null});
   function czytaj(){try{const x=JSON.parse(magazyn().getItem(KL)||'null');if(x&&/^[a-z0-9]{6,16}$/.test(x.pid)&&x.r&&x.r.w)return x}catch(e){}return null}
   function pisz(){try{magazyn().setItem(KL,JSON.stringify(s))}catch(e){}}
-  function stan(){if(!s)s=czytaj()||{pid:(Math.random().toString(36).slice(2,12)+'0000000000').slice(0,10),c:0,n:0,ok:0,r:pusty()};return s}
+  function stan(){if(!s)s=czytaj()||{pid:(Math.random().toString(36).slice(2,12)+'0000000000').slice(0,10),c:0,ts:0,n:0,ok:0,r:pusty()};return s}   // c: początek głosowania (zegar telefonu), ts: to samo według serwera
   function nadaj(tresc){
     if(MOCK){   // tryb próbny bez internetu: wiadomości leżą w pamięci przeglądarki, strona wyników w innej karcie czyta je stamtąd
       const w={id:Math.random().toString(36).slice(2),time:teraz(),event:'message',topic:temat,message:tresc};let l=[];
       try{l=JSON.parse(localStorage.getItem('nnm-mock:'+temat)||'[]')}catch(e){}
       l.push(w);localStorage.setItem('nnm-mock:'+temat,JSON.stringify(l));
       try{const bc=new BroadcastChannel('nnm-mock');bc.postMessage(w);bc.close()}catch(e){}
-      return Promise.resolve()}
+      return Promise.resolve(w)}
     // keepalive: wysyłka kończy się także wtedy, gdy ktoś od razu zablokuje telefon; przy ponowieniu już bez tej opcji
-    return fetch(STAT.url+temat,{method:'POST',body:tresc,keepalive:!proby}).then(r=>{if(!r.ok){const e=new Error('HTTP '+r.status);e.odmowa=true;throw e}})}
+    return fetch(STAT.url+temat,{method:'POST',body:tresc,keepalive:!proby}).then(r=>{if(!r.ok){const e=new Error('HTTP '+r.status);e.odmowa=true;throw e}return r.json().catch(()=>null)})}
+  function pobierz(od){   // wiadomości kanału od chwili „od” (czas serwera): tu szukamy znacznika „zacznij od zera”
+    if(MOCK){let l=[];try{l=JSON.parse(localStorage.getItem('nnm-mock:'+temat)||'[]')}catch(e){}return Promise.resolve(l.filter(m=>m&&m.time>=od))}
+    return fetch(STAT.url+temat+'/json?poll=1&since='+(od-1)).then(r=>{if(!r.ok){const e=new Error('HTTP '+r.status);e.odmowa=true;throw e}return r.text()})
+      .then(t=>t.split('\n').filter(w=>w.trim()).map(w=>{try{return JSON.parse(w)}catch(e){return null}}).filter(Boolean))}
   function plan(ms){clearTimeout(zegar);zegar=setTimeout(pchnij,ms)}
   const dosc=()=>odmowy>=3||bledy>=12;
   function pchnij(){const x=stan();if(wLocie||x.ok>=x.n||dosc()||Date.now()<pauza)return;wLocie=true;const c=x.c,n=x.n;let p;
@@ -278,19 +283,29 @@ const stat=(()=>{
       if(Date.now()<pauza)plan(pauza-Date.now()+500);                      // po odmowie serwera: jedna próba po przerwie
       else if(proby&&proby<4)plan(3000*Math.pow(2,proby-1));               // brak sieci: po 3, 6 i 12 s, potem przy następnym ruchu gracza
       else if(!proby)plan(0)};                                              // w trakcie wysyłki doszła nowa odpowiedź
-    p.then(()=>{proby=0;odmowy=0;bledy=0;if(x.c===c&&x.ok<n){x.ok=n;pisz()}},e=>{if(e&&e.odmowa){odmowy++;pauza=Date.now()+30000}else{proby++;bledy++}}).then(koniec,koniec)}
+    p.then(m=>{proby=0;odmowy=0;bledy=0;if(x.c===c){if(!x.ts&&m&&Number.isFinite(m.time))x.ts=m.time;if(x.ok<n)x.ok=n;pisz()}},e=>{if(e&&e.odmowa){odmowy++;pauza=Date.now()+30000}else{proby++;bledy++}}).then(koniec,koniec)}
+  // Kolejna gra na telefonie, który w tym głosowaniu już coś wysłał: jeśli prowadzący w międzyczasie wyzerował wyniki, zaczyna się nowe głosowanie.
+  function nowaGra(){try{const x=stan();if(x.c&&teraz()-x.c<=STAT.cykl*3600&&x.r.m)spr={trzeba:true,proby:0,wtoku:false}}catch(e){}}
+  function sprawdzZero(){const x=stan();if(!spr.trzeba||spr.wtoku||spr.proby>=3||dosc()||Date.now()<pauza||!x.ts)return;spr.wtoku=true;spr.proby++;const c=x.c,ts=x.ts;let p;
+    try{p=pobierz(ts)}catch(e){p=Promise.reject(e)}
+    p.then(l=>{spr.trzeba=false;const cof=new Set(),zn=[];
+      for(const m of l){let d=null;try{d=JSON.parse(m.message)}catch(e){}if(!d)continue;
+        if(d.t==='nnm1'&&typeof d.z==='string')cof.add(d.z);else if(d.t==='nnm0'&&m.time>=ts)zn.push(m.id)}
+      const nowe=zn.filter(id=>!cof.has(id)&&!(x.z||[]).includes(id));        // x.z: znaczniki, po których ten telefon już zaczął nowe głosowanie
+      if(x.c===c&&nowe.length){x.z=(x.z||[]).concat(nowe).slice(-20);x.c=Math.max(teraz(),c+1);x.ts=0;x.n=0;x.ok=0;x.r=pusty();pisz();zglos()}},
+      e=>{if(e&&e.odmowa){odmowy++;pauza=Date.now()+30000}else bledy++}).then(()=>{spr.wtoku=false},()=>{spr.wtoku=false})}
   function zglos(){try{const x=stan();
     if(!st.m)return;                                                             // przed wyborem miejsca pracy nie ma czego wysyłać
-    if(!x.c||teraz()-x.c>STAT.cykl*3600){x.c=teraz();x.n=0;x.ok=0;x.r=pusty()}   // nowe „głosowanie”
+    if(!x.c||teraz()-x.c>STAT.cykl*3600){x.c=Math.max(teraz(),(x.c||0)+1);x.ts=0;x.n=0;x.ok=0;x.r=pusty()}   // nowe „głosowanie”
     let zm=false;
     if(x.r.m!==st.m&&!Object.keys(x.r.w).length){x.r.m=st.m;zm=true}             // miejsce pracy można poprawić, dopóki nie padła pierwsza odpowiedź
     for(const id of IDS){const k=st.w[id];if(k&&!x.r.w[id]){x.r.w[id]=k;zm=true;
       if(id==='d4')x.r.f=st.f;
       if(id==='d5')x.r.e={p:st.z>=0?1:0,s:st.pismo?1:0}}}                        // p: Kuba pisze do ciebie; s: urzędowe pismo na biurku
     if(zm){x.n++;proby=0;pisz()}
-    pchnij()}catch(e){}}
+    pchnij();sprawdzZero()}catch(e){}}
   try{addEventListener('online',()=>{proby=0;bledy=0;pchnij()});document.addEventListener('visibilitychange',()=>{if(!document.hidden){proby=0;pchnij()}})}catch(e){}
-  return {zglos,pchnij,stan}})();
+  return {zglos,pchnij,nowaGra,stan}})();
 function rysuj(fokus){const e=st.e;let h;
   if(e==='start')h=eStart();else if(e==='sr')h=eSroda();else if(e==='ep')h=eEpilog();
   else{const d=D[e.slice(0,2)],t=e[2];h=t==='s'?eScena(d):(t==='d'?eDecyzja(d):eSkutek(d))}
@@ -299,7 +314,7 @@ function rysuj(fokus){const e=st.e;let h;
 function idz(){let i=KOL.indexOf(st.e)+1;st.e=KOL[i];st.o={};zapisz();rysuj();stat.zglos()}
 gra.addEventListener('click',ev=>{const b=ev.target.closest('button[data-akcja]');if(!b)return;const a=b.dataset.akcja;
   if(a!=='odnowa'&&st.o.reset){st.o.reset=false}
-  if(a==='miejsce'){st=nowy();st.m=b.dataset.m;idz()}
+  if(a==='miejsce'){st=nowy();st.m=b.dataset.m;stat.nowaGra();idz()}
   else if(a==='dalej')idz();
   else if(a==='wybor'){wybierz(b.dataset.id,b.dataset.k);idz()}
   else if(a==='fakty'){st.o[b.dataset.id]=!st.o[b.dataset.id];rysuj(b.id)}
