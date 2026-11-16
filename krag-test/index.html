@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Test zbierania odpowiedzi</title>
+<style>
+:root{--bg:#f6f4ee;--ink:#1d1f24;--muted:#5f6470;--ok:#1f7a4d;--err:#b3261e;--acc:#2f4fa8;--card:#fff}
+*{box-sizing:border-box}
+body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--ink);
+  padding:max(16px,env(safe-area-inset-top)) 16px max(24px,env(safe-area-inset-bottom))}
+h1{font-size:22px;margin:4px 0 12px}
+.card{background:var(--card);border-radius:14px;padding:16px;margin:12px 0;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.row{display:flex;gap:10px}
+button{flex:1;font-size:24px;padding:18px 0;border:0;border-radius:12px;background:var(--acc);color:#fff;font-weight:600}
+button:active{opacity:.7}
+.status{font-size:17px;margin:4px 0}
+.ok{color:var(--ok)}.err{color:var(--err)}.muted{color:var(--muted)}
+.big{font-size:44px;font-weight:700;line-height:1.1}
+ul{padding-left:18px;margin:8px 0 0;font-size:15px}
+small{color:var(--muted);word-break:break-all}
+</style>
+</head>
+<body>
+<h1>Test zbierania odpowiedzi</h1>
+
+<div class="card">
+  <div class="status">Odbiór: <span id="rx" class="muted">łączę…</span></div>
+  <div class="status">Wysyłka: <span id="tx" class="muted">jeszcze nic nie wysłano</span></div>
+</div>
+
+<div class="card">
+  <p style="margin:0 0 10px">Stuknij jedną liczbę:</p>
+  <div class="row">
+    <button data-v="1">1</button><button data-v="2">2</button><button data-v="3">3</button>
+  </div>
+</div>
+
+<div class="card">
+  <div class="muted">Odebrane odpowiedzi</div>
+  <div class="big" id="count">0</div>
+  <div id="avg" class="muted">średnia: –</div>
+  <ul id="list"></ul>
+</div>
+
+<small id="info"></small>
+
+<script>
+(function () {
+  var params = new URLSearchParams(location.search);
+  var topic = params.get('s');
+  if (!topic || !/^[A-Za-z0-9_-]{6,64}$/.test(topic)) {
+    topic = 'krag-test-' + Math.random().toString(36).slice(2, 12);
+    params.set('s', topic);
+    history.replaceState(null, '', location.pathname + '?' + params.toString());
+  }
+  var base = 'https://ntfy.sh/' + topic;
+  var rx = document.getElementById('rx');
+  var tx = document.getElementById('tx');
+  var seen = {};
+  var values = [];
+
+  function setStatus(el, text, cls) { el.textContent = text; el.className = cls; }
+
+  function add(msg) {
+    if (!msg || msg.event !== 'message' || seen[msg.id]) return;
+    seen[msg.id] = true;
+    var d;
+    try { d = JSON.parse(msg.message); } catch (e) { return; }
+    if (!d || d.t !== 'test' || typeof d.v !== 'number') return;
+    values.push(d.v);
+    document.getElementById('count').textContent = values.length;
+    var sum = values.reduce(function (a, b) { return a + b; }, 0);
+    document.getElementById('avg').textContent = 'średnia: ' + (sum / values.length).toFixed(2).replace('.', ',');
+    var li = document.createElement('li');
+    li.textContent = new Date(msg.time * 1000).toLocaleTimeString('pl-PL') + ' — ' + d.v;
+    var ul = document.getElementById('list');
+    ul.insertBefore(li, ul.firstChild);
+  }
+
+  // Odbiór na żywo (Server-Sent Events)
+  try {
+    var es = new EventSource(base + '/sse?since=all');
+    es.onopen = function () { setStatus(rx, 'połączono ✓', 'ok'); };
+    es.onmessage = function (e) { try { add(JSON.parse(e.data)); } catch (_) {} };
+    es.onerror = function () { if (rx.className !== 'ok') setStatus(rx, 'brak połączenia, próbuję ponownie…', 'err'); };
+  } catch (e) {
+    setStatus(rx, 'błąd: ' + e.message, 'err');
+  }
+
+  // Zapas: odpytywanie co 15 s, gdyby sieć blokowała odbiór na żywo
+  function poll() {
+    fetch(base + '/json?poll=1&since=all')
+      .then(function (r) { return r.text(); })
+      .then(function (t) {
+        t.split('\n').forEach(function (line) {
+          if (line.trim()) { try { add(JSON.parse(line)); } catch (_) {} }
+        });
+        if (rx.className !== 'ok') setStatus(rx, 'działa (przez odpytywanie) ✓', 'ok');
+      })
+      .catch(function (e) { if (rx.className !== 'ok') setStatus(rx, 'błąd odbioru: ' + e.message, 'err'); });
+  }
+  setInterval(poll, 15000);
+
+  // Wysyłka
+  Array.prototype.forEach.call(document.querySelectorAll('button[data-v]'), function (b) {
+    b.addEventListener('click', function () {
+      setStatus(tx, 'wysyłam…', 'muted');
+      fetch(base, { method: 'POST', body: JSON.stringify({ t: 'test', v: Number(b.getAttribute('data-v')) }) })
+        .then(function (r) {
+          if (!r.ok) throw new Error('kod ' + r.status);
+          setStatus(tx, 'wysłano ' + b.getAttribute('data-v') + ' ✓', 'ok');
+        })
+        .catch(function (e) { setStatus(tx, 'błąd wysyłki: ' + e.message, 'err'); });
+    });
+  });
+
+  document.getElementById('info').textContent = 'Kanał testowy: ' + topic;
+})();
+</script>
+</body>
+</html>
