@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#fbfaf7">
+<title>Telefon uczestnika</title>
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--ink:#16181d;--ink2:#52514e;--line:#e1e0d9;--acc:#2a78d6;--ok:#006300;--err:#b3261e;--soft:#f3f6fb}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+img{max-width:100%;height:auto}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding:max(14px,env(safe-area-inset-top)) 16px max(32px,env(safe-area-inset-bottom));font-size:18px;line-height:1.45;max-width:640px;margin:0 auto}
+header{display:flex;align-items:center;gap:10px;margin-bottom:6px;font-weight:650;font-size:17px}
+header .st{margin-left:auto;font-size:14px;font-weight:400;color:var(--ink2);display:flex;align-items:center;gap:6px}
+.dot{width:10px;height:10px;border-radius:50%;background:#898781;display:inline-block}.dot.ok{background:#0ca30c}.dot.err{background:#d03b3b}
+h1{font-size:26px;line-height:1.2;margin:10px 0 12px}h2{font-size:20px;line-height:1.25;margin:14px 0 8px}p{margin:8px 0}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.card ul,.card ol{margin:8px 0;padding-left:22px}.card li{margin:4px 0}
+.lead{font-size:20px}.muted{color:var(--ink2)}.small{font-size:15px;color:var(--ink2)}
+.tag{display:inline-block;font-size:13px;font-weight:650;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.q{font-size:19px;font-weight:600;line-height:1.35}
+.opts{display:grid;gap:10px;margin-top:10px}.opts.rzad{grid-template-columns:repeat(auto-fit,minmax(70px,1fr))}
+button{font:inherit;color:inherit;cursor:pointer}
+.opt{font-size:19px;font-weight:600;padding:16px 10px;border-radius:14px;border:2px solid var(--line);background:var(--card);line-height:1.25;text-align:left}
+.opts.rzad .opt{text-align:center}
+.opt.on{border-color:var(--ink);background:var(--ink);color:#fff}
+.opt:disabled,.skala button:disabled{opacity:.35;cursor:default}
+.go{font-size:20px;font-weight:650;width:100%;padding:16px;border:0;border-radius:14px;background:var(--acc);color:#fff;margin-top:14px}.go:disabled{opacity:.4}
+.link{background:none;border:0;padding:0;color:var(--acc);text-decoration:underline;font-size:15px}
+.done{color:var(--ok);font-weight:600;margin-top:10px;min-height:1.4em}.done.err{color:var(--err)}
+.val{font-size:32px;font-weight:700;margin:6px 0 0}
+input[type=range]{width:100%;height:44px;accent-color:var(--acc)}
+textarea{width:100%;min-height:110px;font:inherit;padding:12px;border-radius:12px;border:2px solid var(--line);background:#fff;color:var(--ink);margin-top:8px}
+.skala{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;gap:8px;margin-top:8px}
+.skala button{font-size:21px;font-weight:650;padding:12px 0;border-radius:12px;border:2px solid var(--line);background:#fff}
+.skala button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+.konce{display:flex;justify-content:space-between;font-size:13px;color:var(--ink2);margin-top:4px}
+.ev{border-left:4px solid var(--acc);padding:10px 12px;margin:10px 0;background:var(--soft);border-radius:8px}
+.kw{font-size:19px;line-height:1.4;margin:6px 0}.op{font-size:16px;color:var(--ink2);margin:6px 0}
+.sms{display:table;max-width:92%;background:var(--soft);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:8px 12px;margin:8px 0}
+details.fakty{border:2px solid var(--line);border-radius:12px;padding:8px 12px;margin-top:12px;background:#fff}
+details.fakty summary{font-weight:650;cursor:pointer}details.fakty li{margin:6px 0}
+.zn{font-weight:650;white-space:nowrap}.zn.tak{color:#006300}.zn.nie{color:#b3261e}.zn.rozne{color:var(--ink2)}
+.pasek{height:8px;background:var(--line);border-radius:4px;overflow:hidden;margin:2px 0 10px}
+.pasek i{display:block;height:100%;background:var(--acc);transform-origin:left center;animation:kurcz linear forwards}
+@keyframes kurcz{to{transform:scaleX(0)}}
+footer{margin-top:28px}
+.kroki{display:grid;gap:8px;margin-top:10px}.kroki button{font-size:16px;padding:12px;border-radius:10px;border:1px solid var(--line);background:#fff;text-align:left}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header><span id="nazwa"></span><span class="st"><span class="dot" id="dot"></span><span id="stan">łączę…</span></span></header>
+<main id="main"></main>
+<footer id="stopka">
+  <button class="link" id="recznieB">Ekran się nie zmienia? Wybierz go ręcznie</button>
+  <div id="recznie" class="hidden"><p class="small">Wybierz krok, o którym mówi prowadzący:</p><div class="kroki" id="lista"></div></div>
+</footer>
+<script src="tresc.js"></script>
+<script>
+(function () {
+'use strict';
+var T = window.TRESC, P = new URLSearchParams(location.search);
+var KOD = (P.get('s') || '').toLowerCase(), MOCK = P.get('mock') === '1';
+var main = document.getElementById('main');
+if (!T) {   // brak pliku tresc.js albo błąd składni w nim
+  main.innerHTML = '<h1>Strona się nie wczytała</h1><p class="lead">Odśwież ją. Jeśli to nie pomoże, powiedz prowadzącemu.</p>';
+  document.getElementById('stopka').classList.add('hidden'); document.getElementById('stan').textContent = '';
+  return;
+}
+document.getElementById('nazwa').textContent = T.nazwaTelefon || T.tytul;
+document.title = T.nazwaTelefon || T.tytul;
+if (!/^[a-z0-9]{6,20}$/.test(KOD)) {
+  main.innerHTML = '<h1>Brak kodu sesji</h1><p class="lead">Zeskanuj kod QR z ekranu prowadzącego.</p>';
+  document.getElementById('stopka').classList.add('hidden'); document.getElementById('stan').textContent = '';
+  return;
+}
+
+// ---------- łączność (ten sam kod w obu plikach): ntfy.sh, tryb próbny ?mock=1 albo serwer testowy na localhost ----------
+var SERWER = /^http:\/\/(127\.0\.0\.1|localhost):\d+\/$/.test(P.get('serwer') || '') ? P.get('serwer') : 'https://ntfy.sh/';
+var K_STER = T.prefiks + '-' + KOD + '-c', K_ODP = T.prefiks + '-' + KOD + '-a';
+var bc = MOCK && 'BroadcastChannel' in window ? new BroadcastChannel('prez-mock') : null, mockSub = [];
+function nadaj(kanal, obj) {
+  if (MOCK) {
+    var m = { id: Math.random().toString(36).slice(2), time: Math.floor(Date.now() / 1000), event: 'message', topic: kanal, message: JSON.stringify(obj) };
+    var l = []; try { l = JSON.parse(localStorage.getItem('prez-mock:' + kanal) || '[]'); } catch (e) {}
+    l.push(m); try { localStorage.setItem('prez-mock:' + kanal, JSON.stringify(l)); } catch (e) {}
+    if (bc) bc.postMessage(m);
+    mockSub.forEach(function (s) { if (s.kanal === kanal) s.odbierz(m); });
+    return Promise.resolve(true);
+  }
+  return fetch(SERWER + kanal, { method: 'POST', body: JSON.stringify(obj) }).then(function (r) {
+    if (!r.ok) { var e = new Error('HTTP ' + r.status); e.kod = r.status; throw e; }
+    return true;
+  });
+}
+function sluchaj(kanal, naDane, naStan) {
+  var widziane = {};
+  function odbierz(m) {
+    if (!m || m.event !== 'message' || widziane[m.id]) return;
+    widziane[m.id] = 1;
+    var d; try { d = JSON.parse(m.message); } catch (e) { return; }
+    naDane(d, m);
+  }
+  if (MOCK) {
+    var l = []; try { l = JSON.parse(localStorage.getItem('prez-mock:' + kanal) || '[]'); } catch (e) {}
+    l.forEach(odbierz); mockSub.push({ kanal: kanal, odbierz: odbierz });
+    if (bc) bc.addEventListener('message', function (e) { if (e.data && e.data.topic === kanal) odbierz(e.data); });
+    naStan('ok');
+    return { odswiez: function () { return Promise.resolve(); } };
+  }
+  var proby = 0, czasP = null;
+  function polacz() {
+    naStan('lacze');
+    var es = new EventSource(SERWER + kanal + '/sse?since=all');   // since=all: serwer dosyła też wcześniejsze wiadomości (spóźniony telefon, odświeżona strona)
+    es.onopen = function () { proby = 0; naStan('ok'); };
+    es.onmessage = function (e) { try { odbierz(JSON.parse(e.data)); } catch (_) {} };
+    es.onerror = function () {
+      if (es.readyState !== 2) { naStan('lacze'); return; }   // zerwane łącze: przeglądarka sama łączy się ponownie
+      naStan('brak');                                         // odmowa serwera (np. limit): ponawiamy sami, coraz rzadziej, najwyżej 6 razy
+      clearTimeout(czasP);
+      if (proby < 6) czasP = setTimeout(polacz, Math.min(300, (15 + Math.random() * 15) * Math.pow(2, proby++)) * 1000);
+    };
+  }
+  polacz();
+  return { odswiez: function () {
+    return fetch(SERWER + kanal + '/json?poll=1&since=all').then(function (r) { return r.text(); }).then(function (t) {
+      t.split('\n').forEach(function (w) { if (w.trim()) { try { odbierz(JSON.parse(w)); } catch (_) {} } });
+    });
+  } };
+}
+
+// ---------- pamięć telefonu ----------
+function mag() { return MOCK ? window.sessionStorage : window.localStorage; }   // w trybie próbnym każda karta udaje osobny telefon
+function wez(k) { try { return mag().getItem(k); } catch (e) { return null; } }
+function zapisz(k, v) { try { mag().setItem(k, v); } catch (e) {} }
+var S = null;
+try { S = JSON.parse(wez('prez-' + T.prefiks + '-' + KOD) || 'null'); } catch (e) {}
+// pid: losowy identyfikator ważny tylko w tej sesji (bez imienia i numeru); a: to, co widać na ekranie; w: to, co wysłane
+if (!S || !S.pid || !S.a || !S.w) S = { pid: Math.random().toString(36).slice(2, 12), n: 0, a: {}, w: {} };
+var pid = S.pid;
+function utrwal() { zapisz('prez-' + T.prefiks + '-' + KOD, JSON.stringify(S)); }
+
+// ---------- wysyłka: każda wiadomość niesie wszystkie odpowiedzi tego telefonu, więc zgubiona naprawia się przy następnej ----------
+var czasPon = null, napisOk = '';
+function wyslij(el, proba) {
+  clearTimeout(czasPon);
+  if (!proba) { S.n++; utrwal(); }
+  var n = S.n, tresc = { t: 'a', pid: pid, n: n, a: S.w };
+  function info(tekst, blad) { if (el) { el.textContent = tekst; el.className = 'done' + (blad ? ' err' : ''); } }
+  if (new TextEncoder().encode(JSON.stringify(tresc)).length > 3900) { info('Tekst jest za długi. Skróć go i wyślij ponownie.', true); return; }
+  if (!proba) info('wysyłam…');
+  nadaj(K_ODP, tresc).then(function () { if (n === S.n) info(napisOk); }).catch(function (e) {
+    if (n !== S.n) return;   // jest już nowsza wysyłka, a ona niesie także tę odpowiedź
+    var limit = e.kod === 429, p = (proba || 0) + 1;
+    if (p > 3) { info(limit ? 'Serwer jest zajęty. Wyślij odpowiedź jeszcze raz za minutę.' : 'Nie udało się wysłać. Sprawdź internet i wyślij odpowiedź jeszcze raz.', true); return; }
+    info('Nie doszło. Ponawiam za chwilę…', true);
+    // przy limicie serwera czekamy dłużej i losowo, żeby telefony z jednej sali nie ponawiały w tej samej chwili
+    czasPon = setTimeout(function () { wyslij(el, p); }, limit ? (20 + Math.random() * 20) * 1000 : 4000 * p);
+  });
+}
+function zatwierdz(klucze) { klucze.forEach(function (k) { if (S.a[k] !== undefined) S.w[k] = S.a[k]; }); }
+
+// ---------- rysowanie ekranu z TRESC.ekrany ----------
+// „html” bloku tekstowego i „pokaz” bloku wyboru mogą być funkcjami: dostają odpowiedzi tego telefonu i zwracają HTML
+function widok() { var a = {}, k; for (k in S.w) a[k] = S.w[k]; for (k in S.a) a[k] = S.a[k]; return a; }
+function tekstZ(x) { try { return typeof x === 'function' ? String(x(widok())) : (x || ''); } catch (e) { return ''; } }
+function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+var biezacy = null, czasWys = null, oczek = null;
+function pokaz(id) {
+  var E = T.ekrany[id]; if (!E) return;
+  if (oczek) oczek();   // odpowiedź stuknięta tuż przed zmianą ekranu: wyślij ją teraz, zanim ekran zniknie
+  biezacy = id;
+  var bl = E.bloki || [];
+  var gotowe = bl.some(function (b) { return b.klucz; }) && bl.every(function (b) { return !b.klucz || b.opcjonalne || S.w[b.klucz] !== undefined; });
+  var h = (E.znacznik ? '<span class="tag">' + esc(E.znacznik) + '</span>' : '') + (E.tytul ? '<h1>' + esc(E.tytul) + '</h1>' : '') +
+    (E.czas && !gotowe ? '<div class="pasek" id="pasek"><i style="animation-duration:' + Number(E.czas) + 's"></i></div>' : '');
+  bl.forEach(function (b, i) {
+    if (b.typ === 'tekst') { h += '<div class="card">' + tekstZ(b.html) + '</div>'; return; }
+    h += '<div class="card" data-i="' + i + '">' + (b.pytanie ? '<div class="q">' + esc(b.pytanie) + '</div>' : '');
+    if (b.typ === 'wybor') h += '<div class="opts' + (b.uklad === 'rzad' ? ' rzad' : '') + '">' + b.opcje.map(function (o) {
+      return '<button class="opt" data-v="' + esc(o[0]) + '">' + esc(o[1]) + '</button>'; }).join('') + '</div><div class="pokaz"></div>';
+    if (b.typ === 'suwak') h += '<div class="val"></div><input type="range" min="' + b.min + '" max="' + b.max + '" step="' + (b.krok || 1) + '">';
+    if (b.typ === 'skala') {
+      h += '<div class="skala">';
+      for (var v = b.min || 1; v <= (b.max || 5); v++) h += '<button data-v="' + v + '">' + v + '</button>';
+      h += '</div><div class="konce"><span>' + esc(b.lewo || '') + '</span><span>' + esc(b.prawo || '') + '</span></div>';
+    }
+    if (b.typ === 'pole') h += '<textarea maxlength="' + (b.max || 280) + '" placeholder="' + esc(b.podpowiedz || '') + '"></textarea>';
+    h += '</div>';
+  });
+  h += (E.wyslij ? '<button class="go" id="go">' + esc(E.wyslij) + '</button>' : '') + '<div class="done" id="st"></div>' + (E.stopka ? '<p class="small">' + esc(E.stopka) + '</p>' : '');
+  main.innerHTML = h;
+  var st = document.getElementById('st'), go = document.getElementById('go');
+  var klucze = bl.filter(function (b) { return b.klucz; }).map(function (b) { return b.klucz; });
+  var wymagane = bl.filter(function (b) { return b.klucz && !b.opcjonalne; }).map(function (b) { return b.klucz; });
+  function komplet() { return wymagane.every(function (k) { return S.a[k] !== undefined && S.a[k] !== ''; }); }
+  napisOk = bl.some(function (b) { return b.raz; }) ? 'Wysłane ✓' : 'Wysłane ✓ Możesz zmienić odpowiedź.';
+  function zablokuj() {   // bloki z raz:true: po wysłaniu wyboru nie da się go zmienić; pasek czasu znika po wysłaniu
+    var pas = document.getElementById('pasek');
+    if (pas && wymagane.every(function (k) { return S.w[k] !== undefined; })) pas.classList.add('hidden');
+    Array.prototype.forEach.call(main.querySelectorAll('[data-i]'), function (karta) {
+      var b = bl[Number(karta.getAttribute('data-i'))];
+      if (!b.raz || S.w[b.klucz] === undefined) return;
+      Array.prototype.forEach.call(karta.querySelectorAll('button[data-v]'), function (g) { g.disabled = !g.classList.contains('on'); });
+    });
+  }
+  function zmiana() {
+    utrwal();
+    if (go) { go.disabled = !komplet(); return; }
+    clearTimeout(czasWys);   // krótka zwłoka: kilka szybkich stuknięć to jedna wiadomość
+    oczek = function () { clearTimeout(czasWys); oczek = null; zatwierdz(klucze); zablokuj(); wyslij(st); };
+    czasWys = setTimeout(oczek, 600);
+  }
+  Array.prototype.forEach.call(main.querySelectorAll('[data-i]'), function (karta) {
+    var b = bl[Number(karta.getAttribute('data-i'))], k = b.klucz, pok = karta.querySelector('.pokaz');
+    function dodatek() {
+      if (!pok) return;
+      var p = b.pokaz, w = S.a[k];
+      pok.innerHTML = !p || w === undefined ? '' : typeof p === 'function' ? tekstZ(function (a) { return p(w, a); }) : tekstZ(p[w]);
+    }
+    if (b.typ === 'wybor' || b.typ === 'skala') {
+      var guz = karta.querySelectorAll('button[data-v]');
+      Array.prototype.forEach.call(guz, function (g) {
+        if (String(S.a[k]) === g.getAttribute('data-v')) g.classList.add('on');
+        g.addEventListener('click', function () {
+          Array.prototype.forEach.call(guz, function (x) { x.classList.remove('on'); });
+          g.classList.add('on');
+          S.a[k] = b.typ === 'skala' ? Number(g.getAttribute('data-v')) : g.getAttribute('data-v');
+          dodatek(); zmiana();
+          if (pok && pok.firstChild && pok.scrollIntoView) pok.scrollIntoView({ block: 'nearest' });   // skutek wyboru ma być widoczny bez przewijania
+        });
+      });
+      dodatek();
+    }
+    if (b.typ === 'suwak') {
+      var r = karta.querySelector('input'), val = karta.querySelector('.val');
+      var rys = function () { val.textContent = S.a[k] === undefined ? '— przesuń suwak' : S.a[k] + (b.jednostka || ''); };
+      r.value = S.a[k] === undefined ? Math.round((b.min + b.max) / 2) : S.a[k]; rys();
+      ['input', 'change', 'click', 'touchend'].forEach(function (zd) {
+        r.addEventListener(zd, function () { S.a[k] = Number(r.value); rys(); zmiana(); });
+      });
+    }
+    if (b.typ === 'pole') {
+      var t = karta.querySelector('textarea'); t.value = S.a[k] || '';
+      t.addEventListener('input', function () { S.a[k] = t.value.trim(); utrwal(); if (go) go.disabled = !komplet(); });
+    }
+  });
+  if (go) { go.disabled = !komplet(); go.addEventListener('click', function () { zatwierdz(klucze); zablokuj(); wyslij(st); }); }
+  zablokuj();
+  window.scrollTo(0, 0);
+}
+
+// ---------- ekran zmienia prowadzący; awaryjnie uczestnik wybiera go sam ----------
+var ostN = 0, czek = null, cel = null;
+function ustaw(id) {
+  if (!T.ekrany[id] || id === biezacy) return;
+  pokaz(id);
+  if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) { try { navigator.vibrate(40); } catch (e) {} }
+}
+var kolej = Object.keys(T.ekrany);
+kolej.forEach(function (id) {
+  var E = T.ekrany[id], g = document.createElement('button');
+  g.textContent = E.znacznik || E.tytul || id;
+  g.addEventListener('click', function () { biezacy = null; ustaw(id); document.getElementById('recznie').classList.add('hidden'); });
+  document.getElementById('lista').appendChild(g);
+});
+document.getElementById('recznieB').addEventListener('click', function () { document.getElementById('recznie').classList.toggle('hidden'); });
+var dot = document.getElementById('dot'), stan = document.getElementById('stan');
+pokaz(kolej[0]);
+sluchaj(K_STER, function (d) {
+  if (!d || d.t !== 'e' || !((d.n || 0) > ostN)) return;
+  ostN = d.n; cel = d.e;
+  clearTimeout(czek); czek = setTimeout(function () { ustaw(cel); }, 150);   // krótka zwłoka: przy dołączeniu liczy się tylko ostatni ekran
+}, function (s) {
+  dot.className = 'dot' + (s === 'ok' ? ' ok' : s === 'brak' ? ' err' : '');
+  stan.textContent = s === 'ok' ? (MOCK ? 'tryb próbny' : 'połączono') : s === 'brak' ? 'brak połączenia' : 'łączę…';
+});
+if (!S.n) wyslij(null);   // zgłoszenie obecności: pusty zapis, żeby prowadzący widział liczbę telefonów
+})();
+</script>
+</body>
+</html>

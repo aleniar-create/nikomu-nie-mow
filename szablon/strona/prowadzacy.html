@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Prezentacja</title>
+<style>
+:root{--bg:#fbfaf7;--ink:#16181d;--ink2:#52514e;--muted:#6b6a66;--line:#e1e0d9;--axis:#c3c2b7;--s1:#2a78d6;--s2:#eb6834;--card:#fff;--soft:#f2f0ea}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);overflow:hidden;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink)}
+#scena{position:absolute;left:50%;top:50%;width:1600px;height:900px;transform-origin:center center}
+.slajd{position:absolute;inset:0;padding:64px 92px 54px;display:flex;flex-direction:column}
+.slajd img{max-width:100%;height:auto;align-self:flex-start;flex:none}
+.kicker{font-size:22px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);font-weight:650}
+h1{font-size:64px;line-height:1.08;margin:14px 0 0;font-weight:720;letter-spacing:-.01em}
+h1.q{font-size:50px;line-height:1.15}
+.sub{font-size:34px;color:var(--ink2);margin-top:18px;line-height:1.3}
+.body{font-size:38px;line-height:1.38;margin-top:30px}
+.big{font-size:56px;font-weight:700;line-height:1.15}
+.foot{margin-top:auto;font-size:20px;color:var(--muted);line-height:1.35}
+.row{display:flex;gap:48px}.col{flex:1;min-width:0}
+ol.rules,ul.plain{font-size:38px;line-height:1.32;margin:30px 0 0;padding-left:52px}
+ol.rules li,ul.plain li{margin:0 0 16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:30px 34px}
+.card h3{font-size:34px;margin:0 0 12px}.card p{font-size:30px;line-height:1.35;margin:0}
+.tag{display:inline-block;font-size:20px;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin-bottom:8px}
+.live{font-size:30px;color:var(--ink2);margin-top:26px}.live b{font-size:72px;color:var(--ink);font-weight:720;margin-right:12px}
+.box{border:2px solid var(--line);border-radius:18px;padding:22px 28px;margin-top:22px;background:var(--card)}
+.box .lbl{font-size:22px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);font-weight:650;margin-bottom:8px}
+.box .txt{font-size:32px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.box .txt+.txt{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.box.sol{border-color:var(--ink);background:var(--soft)}
+.dim{color:var(--muted)}
+.timer{font-size:200px;font-weight:720;font-variant-numeric:tabular-nums;line-height:1;cursor:pointer;user-select:none;color:var(--ink2)}
+.timer.run{color:var(--ink)}.timer.end{color:#d03b3b}
+.tbtns{display:flex;gap:14px;margin-top:22px}
+.tbtns button{font:inherit;font-size:24px;padding:12px 20px;border-radius:12px;border:2px solid var(--line);background:var(--card);cursor:pointer}
+.hint{font-size:20px;color:var(--muted);margin-top:14px}
+.qr{background:#fff;border-radius:12px;overflow:hidden;display:inline-block}.qr svg{display:block;width:100%;height:100%}
+.chart{margin-top:28px}
+.legend{display:flex;gap:34px;font-size:24px;color:var(--ink2);margin-bottom:18px}
+.legend span{display:flex;align-items:center;gap:10px}.legend i{width:18px;height:18px;border-radius:4px;display:inline-block}
+.grp{display:flex;align-items:center;padding:12px 0}
+.glabel{width:430px;flex:none;font-size:28px;line-height:1.2;padding-right:24px}.glabel.hl{font-weight:720}
+.plot{flex:1;border-left:1px solid var(--axis);padding:4px 0}
+.brow{display:flex;align-items:center;height:30px;margin:4px 0}
+.bar{height:24px;border-radius:0 4px 4px 0;min-width:2px}
+.bval{font-size:26px;margin-left:14px;font-variant-numeric:tabular-nums;white-space:nowrap}
+.ticks{margin-left:430px;position:relative;height:30px;font-size:20px;color:var(--muted)}.ticks span{position:absolute;transform:translateX(-50%)}
+.chart.compact .grp{padding:2px 0}.chart.compact .glabel{font-size:24px}.chart.compact .brow{height:28px;margin:2px 0}.chart.compact .bval{font-size:23px}
+.cap{font-size:30px;line-height:1.35;margin-top:22px}
+table.t{border-collapse:collapse;font-size:28px;line-height:1.25;margin-top:22px}
+table.t th,table.t td{border-bottom:1px solid var(--line);padding:10px 44px 10px 0;text-align:left;vertical-align:top}
+table.t th{font-size:21px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);font-weight:650}
+table.t.maly{font-size:26px}table.t.maly th{font-size:19px}table.t.maly th,table.t.maly td{padding:8px 30px 8px 0}
+.zn{font-weight:720;white-space:nowrap}.zn.tak{color:#006300}.zn.nie{color:#b3261e}.zn.rozne{color:var(--ink2)}
+.scena{font-size:38px;line-height:1.35;margin-top:22px}.scena .op{color:var(--ink2);font-size:30px}
+.box ul{font-size:32px;line-height:1.3;margin:0;padding-left:36px}.box li{margin:0 0 8px}.box li:last-child{margin:0}
+#hud{position:fixed;right:14px;bottom:10px;display:flex;align-items:center;gap:10px;font:14px system-ui,sans-serif;color:var(--ink2);opacity:.35;transition:opacity .2s;z-index:5}
+#hud:hover{opacity:1}#hud button{font:inherit;border:1px solid var(--line);background:#fff;border-radius:8px;padding:2px 10px;cursor:pointer}
+.dot{width:9px;height:9px;border-radius:50%;background:#898781;display:inline-block}.dot.ok{background:#0ca30c}.dot.err{background:#d03b3b}
+#ostrz{position:fixed;left:50%;top:12px;transform:translateX(-50%);background:#fff3f0;border:1px solid #f0c4b8;color:#8a2b17;font:15px system-ui,sans-serif;padding:8px 14px;border-radius:10px;z-index:6}
+#kontrola{position:fixed;left:16px;top:16px;max-width:620px;max-height:70%;overflow:auto;background:#fff3f0;border:1px solid #f0c4b8;color:#8a2b17;font:15px/1.45 system-ui,sans-serif;padding:12px 16px;border-radius:12px;z-index:8}
+#kontrola ul{margin:6px 0 8px;padding-left:20px}#kontrola button{font:inherit;border:1px solid #f0c4b8;background:#fff;border-radius:8px;padding:2px 10px;cursor:pointer}
+#panel{position:fixed;right:16px;top:16px;width:420px;max-height:calc(100% - 60px);overflow:auto;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.12);padding:18px 20px;font:15px/1.45 system-ui,sans-serif;z-index:7}
+#panel h4{margin:0 0 8px;font-size:17px}
+#panel button{font:inherit;display:block;width:100%;text-align:left;margin:6px 0;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fafaf8;cursor:pointer}
+#panel code{background:#f2f0ea;padding:1px 5px;border-radius:5px;word-break:break-all}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="scena"></div>
+<div id="hud">
+  <button id="wsteczB" title="Wstecz (←)">‹</button><span id="poz"></span><button id="dalejB" title="Dalej (→)">›</button>
+  <span class="dot" id="hdot"></span><span id="hile">0 telefonów</span><button id="panelB" title="Panel prowadzącego (N)">N</button>
+</div>
+<div id="ostrz" class="hidden"></div>
+<div id="kontrola" class="hidden"></div>
+<div id="panel" class="hidden"></div>
+<script src="qrcode.js"></script>
+<script src="tresc.js"></script>
+<script>
+(() => {
+'use strict';
+const T = window.TRESC, P = new URLSearchParams(location.search), MOCK = P.get('mock') === '1';
+if (!T || !T.slajdy || !T.slajdy.length || !T.ekrany || !Object.keys(T.ekrany).length) {
+  document.body.innerHTML = '<div style="font:22px/1.5 system-ui,sans-serif;padding:60px;max-width:900px"><b>Nie wczytał się plik tresc.js.</b><br>' +
+    'Sprawdź, czy leży w tym samym folderze co ta strona i czy nie ma w nim błędu składni (np. brakującego przecinka albo cudzysłowu). ' +
+    'Dokładny błąd pokaże konsola przeglądarki: na Macu Cmd+Option+J, w Windows Ctrl+Shift+J.</div>';
+  return;
+}
+let KOD = (P.get('s') || '').toLowerCase();
+if (!/^[a-z0-9]{6,20}$/.test(KOD)) {   // otwarcie bez kodu = nowa sesja z pustymi wynikami; odświeżenie strony zachowuje sesję
+  KOD = Array.from({ length: 8 }, () => 'abcdefghijkmnpqrstuvwxyz23456789'[Math.floor(Math.random() * 32)]).join('');
+  P.set('s', KOD); history.replaceState(null, '', location.pathname + '?' + P.toString() + location.hash);
+}
+document.title = T.tytul;
+const ADRES = new URL('./', location.href).href + '?s=' + KOD + (MOCK ? '&mock=1' : '');   // link dla uczestników (to on jest w kodzie QR)
+
+// ---------- łączność (ten sam kod w obu plikach): ntfy.sh, tryb próbny ?mock=1 albo serwer testowy na localhost ----------
+var SERWER = /^http:\/\/(127\.0\.0\.1|localhost):\d+\/$/.test(P.get('serwer') || '') ? P.get('serwer') : 'https://ntfy.sh/';
+var K_STER = T.prefiks + '-' + KOD + '-c', K_ODP = T.prefiks + '-' + KOD + '-a';
+var bc = MOCK && 'BroadcastChannel' in window ? new BroadcastChannel('prez-mock') : null, mockSub = [];
+function nadaj(kanal, obj) {
+  if (MOCK) {
+    var m = { id: Math.random().toString(36).slice(2), time: Math.floor(Date.now() / 1000), event: 'message', topic: kanal, message: JSON.stringify(obj) };
+    var l = []; try { l = JSON.parse(localStorage.getItem('prez-mock:' + kanal) || '[]'); } catch (e) {}
+    l.push(m); try { localStorage.setItem('prez-mock:' + kanal, JSON.stringify(l)); } catch (e) {}
+    if (bc) bc.postMessage(m);
+    mockSub.forEach(function (s) { if (s.kanal === kanal) s.odbierz(m); });
+    return Promise.resolve(true);
+  }
+  return fetch(SERWER + kanal, { method: 'POST', body: JSON.stringify(obj) }).then(function (r) {
+    if (!r.ok) { var e = new Error('HTTP ' + r.status); e.kod = r.status; throw e; }
+    return true;
+  });
+}
+function sluchaj(kanal, naDane, naStan) {
+  var widziane = {};
+  function odbierz(m) {
+    if (!m || m.event !== 'message' || widziane[m.id]) return;
+    widziane[m.id] = 1;
+    var d; try { d = JSON.parse(m.message); } catch (e) { return; }
+    naDane(d, m);
+  }
+  if (MOCK) {
+    var l = []; try { l = JSON.parse(localStorage.getItem('prez-mock:' + kanal) || '[]'); } catch (e) {}
+    l.forEach(odbierz); mockSub.push({ kanal: kanal, odbierz: odbierz });
+    if (bc) bc.addEventListener('message', function (e) { if (e.data && e.data.topic === kanal) odbierz(e.data); });
+    naStan('ok');
+    return { odswiez: function () { return Promise.resolve(); } };
+  }
+  var proby = 0, czasP = null;
+  function polacz() {
+    naStan('lacze');
+    var es = new EventSource(SERWER + kanal + '/sse?since=all');   // since=all: serwer dosyła też wcześniejsze wiadomości (spóźniony telefon, odświeżona strona)
+    es.onopen = function () { proby = 0; naStan('ok'); };
+    es.onmessage = function (e) { try { odbierz(JSON.parse(e.data)); } catch (_) {} };
+    es.onerror = function () {
+      if (es.readyState !== 2) { naStan('lacze'); return; }   // zerwane łącze: przeglądarka sama łączy się ponownie
+      naStan('brak');                                         // odmowa serwera (np. limit): ponawiamy sami, coraz rzadziej, najwyżej 6 razy
+      clearTimeout(czasP);
+      if (proby < 6) czasP = setTimeout(polacz, Math.min(300, (15 + Math.random() * 15) * Math.pow(2, proby++)) * 1000);
+    };
+  }
+  polacz();
+  return { odswiez: function () {
+    return fetch(SERWER + kanal + '/json?poll=1&since=all').then(function (r) { return r.text(); }).then(function (t) {
+      t.split('\n').forEach(function (w) { if (w.trim()) { try { odbierz(JSON.parse(w)); } catch (_) {} } });
+    });
+  } };
+}
+
+// ---------- dane z sali: ostatni zapis każdego telefonu ----------
+const REK = {}, KLUCZE = {}, obce = {};
+Object.values(T.ekrany).forEach(e => (e.bloki || []).forEach(b => { if (b.klucz) KLUCZE[b.klucz] = 1; }));
+let lacze = 'lacze', probny = null;   // probny: id slajdu rysowanego „na sucho” przy kontroli treści
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const zapisy = f => Object.values(REK).map(r => r.a).filter(a => !f || f(a));
+const znany = k => { if (probny && !KLUCZE[k]) obce[k] = probny; };   // slajd pyta o odpowiedź, której nie zbiera żaden ekran telefonu
+const H = {
+  esc, qr, slupki, wykres, minutnik,
+  osoby: () => Object.keys(REK).length,
+  wartosci: (k, f) => { znany(k); return zapisy(f).map(a => a[k]).filter(v => v !== undefined && v !== null && v !== ''); },
+  ile: (k, f) => H.wartosci(k, f).length,
+  srednia: (k, f) => { const v = H.wartosci(k, f).filter(x => typeof x === 'number'); return v.length ? v.reduce((a, b) => a + b, 0) / v.length : null; },
+  zlicz: (k, f) => { const c = {}; H.wartosci(k, f).forEach(v => { c[v] = (c[v] || 0) + 1; }); return c; },
+  zapisy: f => zapisy(f),   // lista odpowiedzi wszystkich telefonów: [{ klucz: wartość, ... }, ...]
+  policz: f => {            // ile telefonów daje dany wynik funkcji f(odpowiedzi), np. własne zakończenie historii
+    const c = {};
+    zapisy().forEach(a => { let v; try { v = f(a); } catch (e) { return; } if (v !== undefined && v !== null && v !== '') c[v] = (c[v] || 0) + 1; });
+    return c;
+  },
+  opcje: k => {
+    for (const e of Object.values(T.ekrany)) for (const b of e.bloki || []) {
+      if (b.klucz !== k) continue;
+      if (b.opcje) return b.opcje;
+      if (b.typ === 'skala') { const o = []; for (let v = b.min || 1; v <= (b.max || 5); v++) o.push([v, String(v)]); return o; }
+    }
+    return [];
+  },
+  odm: (n, jeden, dwa, piec) => n === 1 ? jeden : (n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % 100 > 14)) ? dwa : piec,
+  zebrane: k => '<div class="live"><b>' + H.ile(k) + '</b>' + H.odm(H.ile(k), 'odpowiedź', 'odpowiedzi', 'odpowiedzi') + ' · telefonów w sali: ' + H.osoby() + '</div>',
+  teksty: (k, ile, f) => {
+    znany(k);
+    const t = Object.values(REK).filter(r => r.a[k] && (!f || f(r.a))).sort((a, b) => b.ts - a.ts).slice(0, ile || 3).map(r => '<div class="txt">' + esc(r.a[k]) + '</div>');
+    return t.length ? t.join('') : '<div class="txt dim">— jeszcze nic nie przyszło —</div>';
+  }
+};
+function qr(px) {
+  if (typeof qrcode === 'undefined') return '<div class="box" style="width:' + px + 'px;margin:0"><div class="txt" style="font-size:22px;word-break:break-all;display:block">' + esc(ADRES) + '</div></div>';
+  const q = qrcode(0, 'M'); q.addData(ADRES); q.make();
+  return '<div class="qr" style="width:' + px + 'px;height:' + px + 'px">' + q.createSvgTag({ cellSize: 8, margin: 2, scalable: true }) + '</div>';
+}
+// Poziome słupki. serie: [{nazwa, kolor}], grupy: [{etykieta, wartosci: [...], wyr}], max, fmt(wartość, nrSerii), podzialka: [{v, n}]
+function slupki({ serie, grupy, max, fmt, podzialka, legenda = true, szer = 760, ciasno = false }) {
+  let h = '<div class="chart' + (ciasno ? ' compact' : '') + '">';
+  if (legenda && serie.length > 1) h += '<div class="legend">' + serie.map(s => '<span><i style="background:' + s.kolor + '"></i>' + esc(s.nazwa) + '</span>').join('') + '</div>';
+  grupy.forEach(g => {
+    h += '<div class="grp"><div class="glabel' + (g.wyr ? ' hl' : '') + '">' + g.etykieta + '</div><div class="plot">';
+    g.wartosci.forEach((v, i) => {
+      if (v === undefined || !serie[i]) return;
+      const w = v == null ? 0 : Math.max(0, Math.min(1, v / max)) * szer;
+      h += '<div class="brow"><div class="bar" style="width:' + w.toFixed(1) + 'px;background:' + serie[i].kolor + '"></div><span class="bval' + (v == null ? ' dim' : '') + '">' + fmt(v, i) + '</span></div>';
+    });
+    h += '</div></div>';
+  });
+  if (podzialka) h += '<div class="ticks">' + podzialka.map(t => '<span style="left:' + (t.v / max * szer).toFixed(1) + 'px">' + t.n + '</span>').join('') + '</div>';
+  return h + '</div>';
+}
+// Rozkład odpowiedzi na pytanie wyboru; „z”: drugi klucz do porównania (np. to samo pytanie na końcu)
+function wykres(k, { z = null, nazwy = ['Na początku', 'Na końcu'], wyroznij = null } = {}) {
+  const op = H.opcje(k), a = H.zlicz(k), sa = H.ile(k), b = z ? H.zlicz(z) : null, sb = z ? H.ile(z) : 0;
+  const proc = (n, s) => s ? Math.round(n / s * 100) : 0;
+  return slupki({
+    serie: z ? [{ nazwa: nazwy[0] + ' (n = ' + sa + ')', kolor: 'var(--s1)' }, { nazwa: nazwy[1] + ' (n = ' + sb + ')', kolor: 'var(--s2)' }] : [{ nazwa: 'Odpowiedzi', kolor: 'var(--s1)' }],
+    max: Math.max(1, ...op.map(o => Math.max(a[o[0]] || 0, b ? b[o[0]] || 0 : 0))),
+    fmt: (v, i) => v + ' (' + proc(v, i ? sb : sa) + '%)',
+    grupy: op.map(o => ({ etykieta: esc(o[1]), wyr: o[0] === wyroznij, wartosci: z ? [a[o[0]] || 0, b[o[0]] || 0] : [a[o[0]] || 0] }))
+  });
+}
+
+// ---------- minutnik ----------
+const TM = { calosc: 0, zostalo: 0, idzie: false, ost: 0 };
+const mmss = s => Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
+function tUstaw(s, start) { TM.calosc = s; TM.zostalo = s; TM.idzie = !!start; TM.ost = Date.now(); tRys(); }
+function tPrzel() { if (!TM.calosc) return; if (TM.zostalo <= 0) TM.zostalo = TM.calosc; TM.idzie = !TM.idzie; TM.ost = Date.now(); tRys(); }
+function tRys() {
+  const el = document.getElementById('timer'); if (!el) return;
+  el.textContent = mmss(Math.ceil(TM.zostalo));
+  el.classList.toggle('run', TM.idzie); el.classList.toggle('end', TM.calosc > 0 && TM.zostalo <= 0);
+}
+setInterval(() => {
+  if (!TM.idzie) return;
+  const t = Date.now(); TM.zostalo = Math.max(0, TM.zostalo - (t - TM.ost) / 1000); TM.ost = t;
+  if (TM.zostalo <= 0) TM.idzie = false;
+  tRys();
+}, 200);
+function minutnik(przyciski) {   // przyciski: np. [120, 60] — kliknięcie ustawia i uruchamia czas
+  return '<div class="timer" id="timer"></div>' +
+    (przyciski ? '<div class="tbtns">' + przyciski.map(s => '<button data-t="' + s + '">' + mmss(s) + '</button>').join('') + '</div>' : '') +
+    '<div class="hint">T albo kliknięcie — start / pauza</div>';
+}
+
+// ---------- slajdy ----------
+const SL = T.slajdy, scena = document.getElementById('scena'), EKR = [];
+SL.forEach((s, i) => { EKR[i] = s.ekran || EKR[i - 1] || Object.keys(T.ekrany)[0]; });
+let idx = 0, krok = 0, rCzek = null;
+function dopasuj() { scena.style.transform = 'translate(-50%,-50%) scale(' + Math.min(innerWidth / 1600, innerHeight / 900) + ')'; }
+addEventListener('resize', dopasuj); dopasuj();
+function rysuj() {
+  let tresc;
+  try { tresc = SL[idx].html(H, krok); }
+  catch (e) { tresc = '<div class="kicker">Błąd w slajdzie „' + esc(SL[idx].id) + '”</div><div class="body">' + esc(e.message) + '</div>'; }
+  scena.innerHTML = '<div class="slajd">' + tresc + '</div>';
+  const t = document.getElementById('timer'); if (t) t.addEventListener('click', tPrzel);
+  scena.querySelectorAll('[data-t]').forEach(b => b.addEventListener('click', () => tUstaw(Number(b.getAttribute('data-t')), true)));
+  tRys();
+  document.getElementById('poz').textContent = (idx + 1) + ' / ' + SL.length;
+}
+function planRys() { if (!rCzek) rCzek = setTimeout(() => { rCzek = null; rysuj(); }, 250); }   // nowe odpowiedzi odświeżają slajd najwyżej 4 razy na sekundę
+function adres() { history.replaceState(null, '', location.pathname + location.search + '#' + (idx + 1) + (krok ? '.' + krok : '')); }
+function idz(i, k) {
+  const nowy = i !== idx;
+  idx = Math.max(0, Math.min(SL.length - 1, i)); krok = k || 0;
+  if (nowy) { if (SL[idx].czas) tUstaw(SL[idx].czas, false); else { TM.calosc = 0; TM.idzie = false; } }
+  rysuj(); adres(); planEkran(EKR[idx]);
+}
+function dalej() { if (krok < (SL[idx].kroki || 0)) { krok++; rysuj(); adres(); } else if (idx < SL.length - 1) idz(idx + 1, 0); }
+function wstecz() { if (krok > 0) { krok--; rysuj(); adres(); } else if (idx > 0) idz(idx - 1, SL[idx - 1].kroki || 0); }
+
+// ---------- sterowanie telefonami: zmiana slajdu wysyła nazwę ekranu ----------
+let ostEkran = null, eCzek = null, eNr = 0;
+const ostrz = document.getElementById('ostrz');
+function wyslijEkran(e, wymus, proba) {
+  if (!e || (!wymus && e === ostEkran)) return;
+  const nr = ++eNr;   // liczy się tylko ostatnia rozpoczęta wysyłka
+  nadaj(K_STER, { t: 'e', e: e, n: Date.now() }).then(() => {
+    if (nr !== eNr) return;
+    ostEkran = e; ostrz.classList.add('hidden'); panelRys();
+  }).catch(() => {
+    if (nr !== eNr) return;
+    const p = (proba || 0) + 1, ponowie = p <= 3 && EKR[idx] === e;
+    ostrz.textContent = 'Telefony nie dostały nowego ekranu.' + (ponowie ? ' Ponawiam…' : '') + ' Sprawdź internet albo naciśnij N → „Wyślij ekran ponownie”.';
+    ostrz.classList.remove('hidden');
+    if (ponowie) { clearTimeout(eCzek); eCzek = setTimeout(() => wyslijEkran(e, true, p), 8000); }
+  });
+}
+function planEkran(e) { clearTimeout(eCzek); eCzek = setTimeout(() => wyslijEkran(e), 600); }   // zwłoka: szybkie przeklikanie slajdów nie zasypuje telefonów
+
+// ---------- kontrola treści: typowe pomyłki w tresc.js widać od razu, a nie w trakcie zajęć ----------
+function kontrola() {
+  const u = [], E = T.ekrany, znane = { tekst: 1, wybor: 1, suwak: 1, skala: 1, pole: 1 }, idy = {};
+  if (!/^[a-z0-9-]{3,40}$/.test(T.prefiks || '')) u.push('prefiks: dozwolone są małe litery bez polskich znaków, cyfry i myślnik, od 3 do 40 znaków');
+  Object.keys(E).forEach(id => {
+    const bl = E[id].bloki || [];
+    bl.forEach((b, i) => {
+      const gdzie = 'ekran „' + id + '”, blok ' + (i + 1) + ': ';
+      if (!znane[b.typ]) u.push(gdzie + 'nieznany typ „' + b.typ + '”');
+      else if (b.typ !== 'tekst' && !b.klucz) u.push(gdzie + 'brak pola „klucz”');
+      if (b.typ === 'wybor' && !(b.opcje && b.opcje.length)) u.push(gdzie + 'brak listy „opcje”');
+      if (b.typ === 'suwak' && !(b.max > b.min)) u.push(gdzie + 'suwak wymaga liczb „min” i „max”');
+    });
+    if (bl.some(b => b.typ === 'pole') && !E[id].wyslij) u.push('ekran „' + id + '”: pole tekstowe wymaga przycisku, dodaj „wyslij”');
+  });
+  // treść zależna od odpowiedzi (funkcje w „html” i „pokaz”): próba na przykładowych odpowiedziach
+  const proba = {};
+  Object.values(E).forEach(e => (e.bloki || []).forEach(b => { if (b.klucz) proba[b.klucz] = b.opcje && b.opcje.length ? b.opcje[0][0] : b.typ === 'pole' ? 'x' : (b.min !== undefined ? b.min : 1); }));
+  // ...i druga próba bez wcześniejszych odpowiedzi: tak wygląda telefon, który dołączył później
+  Object.keys(E).forEach(id => (E[id].bloki || []).forEach((b, i) => {
+    const uruchom = baza => {
+      if (typeof b.html === 'function') b.html(Object.assign({}, baza));
+      if (b.pokaz) (b.opcje || []).forEach(o => {
+        const a = Object.assign({}, baza); a[b.klucz] = o[0];
+        if (typeof b.pokaz === 'function') b.pokaz(o[0], a); else if (typeof b.pokaz[o[0]] === 'function') b.pokaz[o[0]](a);
+      });
+    };
+    const gdzie = 'ekran „' + id + '”, blok ' + (i + 1) + ': ';
+    try { uruchom(proba); } catch (e) { u.push(gdzie + 'błąd w treści zależnej od odpowiedzi: ' + e.message); return; }
+    try { uruchom({}); } catch (e) { u.push(gdzie + 'treść zależna od odpowiedzi nie działa na telefonie, który nie ma wcześniejszych odpowiedzi (np. dołączył później): ' + e.message); }
+  }));
+  SL.forEach((s, i) => {
+    const gdzie = 'slajd ' + (i + 1) + (s.id ? ' („' + s.id + '”)' : '') + ': ';
+    if (!s.id) u.push(gdzie + 'brak „id”'); else if (idy[s.id]) u.push(gdzie + 'to samo „id” ma inny slajd'); else idy[s.id] = 1;
+    if (s.ekran && !E[s.ekran]) u.push(gdzie + 'nie ma ekranu telefonu „' + s.ekran + '”');
+    if (typeof s.html !== 'function') { u.push(gdzie + '„html” musi być funkcją'); return; }
+    for (let k = 0; k <= (s.kroki || 0); k++) {   // rysowanie „na sucho”: wyłapuje błędy w kodzie slajdu i literówki w kluczach
+      probny = s.id || String(i + 1);
+      try { s.html(H, k); } catch (e) { u.push(gdzie + 'błąd w kodzie slajdu' + (k ? ' (krok ' + k + ')' : '') + ': ' + e.message); break; }
+    }
+    probny = null;
+  });
+  Object.keys(obce).forEach(k => u.push('slajd „' + obce[k] + '” pyta o odpowiedź „' + k + '”, a żaden ekran telefonu nie ma takiego klucza'));
+  return u;
+}
+// Szacunek dla telefonów w jednej sieci Wi-Fi (wspólny adres): ok. 30 połączeń naraz i 250 wiadomości na dobę na adres (limity ntfy.sh)
+function szacunek() {
+  const zb = {};
+  EKR.forEach(e => { if (T.ekrany[e] && (T.ekrany[e].bloki || []).some(b => b.klucz)) zb[e] = 1; });
+  const n = Object.keys(zb).length;
+  return { ekrany: n, telefony: Math.max(1, Math.min(25, Math.floor(220 / (n + 1)))) };
+}
+
+// ---------- pasek stanu i panel prowadzącego ----------
+const panel = document.getElementById('panel');
+function hud() {
+  document.getElementById('hdot').className = 'dot' + (lacze === 'ok' ? ' ok' : lacze === 'brak' ? ' err' : '');
+  const n = H.osoby();
+  document.getElementById('hile').textContent = n + ' ' + H.odm(n, 'telefon', 'telefony', 'telefonów') + (MOCK ? ' · próba' : '');
+  panelRys();
+}
+function panelRys() {
+  if (panel.classList.contains('hidden')) return;
+  panel.innerHTML = '<h4>Panel prowadzącego</h4><div>Kod sesji: <code>' + KOD + '</code>' + (MOCK ? ' · <b>tryb próbny</b>' : '') + '</div>' +
+    '<div style="margin:8px 0">' + qr(180) + '</div><div>Link dla uczestników:<br><code>' + esc(ADRES) + '</code></div>' +
+    '<p>Połączenie: <b>' + (lacze === 'ok' ? 'działa' : lacze === 'brak' ? 'brak' : 'łączę…') + '</b> · telefonów: <b>' + H.osoby() + '</b><br>Ekran na telefonach: <b>' + esc(ostEkran || '—') + '</b></p>' +
+    '<button id="pE">Wyślij ekran ponownie do telefonów</button><button id="pO">Odśwież wyniki</button>' +
+    '<button id="pU">Otwórz widok uczestnika w nowej karcie</button><button id="pN">Nowa sesja (nowy kod, puste wyniki)</button>' +
+    '<p><b>Kontrola treści:</b> ' + (UWAGI.length ? '</p><ul style="margin:0 0 8px;padding-left:20px;color:#8a2b17">' + UWAGI.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><p>' : 'bez uwag<br>') +
+    'Ekrany z odpowiedzią: <b>' + SZAC.ekrany + '</b>. Szacunek dla jednej sieci Wi-Fi: do <b>' + SZAC.telefony + '</b> telefonów.</p>' +
+    '<p style="color:#6b6a66;margin-top:10px">Klawisze: → dalej · ← wstecz · F pełny ekran · T minutnik · N ten panel</p>';
+  panel.querySelector('#pE').onclick = () => wyslijEkran(EKR[idx], true);
+  panel.querySelector('#pO').onclick = () => { sub.odswiez().then(rysuj).catch(() => {}); };
+  panel.querySelector('#pU').onclick = () => window.open(ADRES, '_blank');
+  panel.querySelector('#pN').onclick = () => {
+    if (!confirm('Zacząć nową sesję? Telefony będą musiały zeskanować nowy kod QR.')) return;
+    P.delete('s'); location.href = location.pathname + '?' + P.toString();
+  };
+}
+function przelPanel() { panel.classList.toggle('hidden'); panelRys(); }
+document.getElementById('wsteczB').onclick = e => { wstecz(); e.currentTarget.blur(); };
+document.getElementById('dalejB').onclick = e => { dalej(); e.currentTarget.blur(); };
+document.getElementById('panelB').onclick = e => { przelPanel(); e.currentTarget.blur(); };
+document.addEventListener('keydown', e => {
+  const k = e.key;
+  if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(k)) { e.preventDefault(); dalej(); }
+  else if (['ArrowLeft', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); wstecz(); }
+  else if (k === 'f' || k === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen().catch(() => {}); else document.exitFullscreen(); }
+  else if (k === 'n' || k === 'N') przelPanel();
+  else if (k === 't' || k === 'T') tPrzel();
+  else if (k === 'Home') idz(0, 0);
+  else if (k === 'End') idz(SL.length - 1, 0);
+});
+
+// ---------- start ----------
+const UWAGI = kontrola(), SZAC = szacunek();
+if (UWAGI.length) {
+  const k = document.getElementById('kontrola');
+  k.innerHTML = '<b>Do poprawy w pliku tresc.js (' + UWAGI.length + '):</b><ul>' + UWAGI.map(x => '<li>' + esc(x) + '</li>').join('') + '</ul><button>Schowaj</button>';
+  k.querySelector('button').onclick = () => k.classList.add('hidden');
+  k.classList.remove('hidden');
+}
+const sub = sluchaj(K_ODP, (d, m) => {
+  if (!d || d.t !== 'a' || !d.pid) return;
+  if (!REK[d.pid] || REK[d.pid].n <= d.n) REK[d.pid] = { n: d.n, a: d.a || {}, ts: m.time };
+  hud(); planRys();
+}, s => { lacze = s; hud(); });
+const h0 = /^#(\d+)(?:\.(\d+))?$/.exec(location.hash);
+idx = -1;
+idz(h0 ? Number(h0[1]) - 1 : 0, h0 && h0[2] ? Number(h0[2]) : 0);
+hud();
+})();
+</script>
+</body>
+</html>

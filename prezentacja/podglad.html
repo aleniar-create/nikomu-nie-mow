@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Podgląd prezentacji</title>
+<style>
+:root{--bg:#fbfaf7;--ink:#16181d;--ink2:#52514e;--line:#e1e0d9;--acc:#2a78d6}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#ecebe6;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:12px;padding:10px 18px;background:var(--bg);border-bottom:1px solid var(--line);flex:none}
+header b{font-size:17px}#tytul{color:var(--ink2);font-size:16px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sp{flex:1}
+button{font:inherit;font-size:16px;font-weight:650;border-radius:10px;padding:8px 16px;border:1.5px solid var(--line);background:#fff;color:var(--ink);cursor:pointer}
+button.glowny{background:var(--acc);border-color:var(--acc);color:#fff}
+main{flex:1;display:flex;gap:18px;padding:16px 18px 6px;min-height:0;align-items:flex-start}
+.ekran{flex:1;min-width:0}.ekran .rama{width:100%;aspect-ratio:16/9;max-height:calc(100vh - 150px);background:var(--bg);border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.tel{flex:none;width:392px;max-width:42vw}.tel .rama{height:calc(100vh - 150px);max-height:760px;background:var(--bg);border:8px solid var(--ink);border-radius:26px;overflow:hidden}
+iframe{width:100%;height:100%;border:0;display:block}
+.pod{font-size:14px;color:var(--ink2);margin-top:6px;text-align:center}
+.uw{flex:none;font-size:14.5px;color:var(--ink2);padding:0 18px 12px;margin:0}
+#brak{padding:60px;font-size:20px;line-height:1.5;max-width:800px}
+.hidden{display:none!important}
+</style>
+</head>
+<body>
+<header>
+  <b>Podgląd</b><span id="tytul"></span><span class="sp"></span>
+  <button id="wstecz">← Wstecz</button><button id="dalej" class="glowny">Dalej →</button>
+</header>
+<main id="main">
+  <div class="ekran"><div class="rama"><iframe id="prez" title="Duży ekran w sali"></iframe></div><div class="pod">Duży ekran w sali</div></div>
+  <div class="tel"><div class="rama"><iframe id="tel" title="Telefon uczestnika"></iframe></div><div class="pod">Telefon uczestnika: stuknij odpowiedź</div></div>
+</main>
+<p class="uw" id="uw">To tryb próbny: nic nie wychodzi do internetu, a telefon po prawej udaje jednego uczestnika. Slajdy przełączasz przyciskami u góry albo strzałkami na klawiaturze.</p>
+<div id="brak" class="hidden"></div>
+<script src="sala/karta.js"></script>
+<script>
+(function () {
+'use strict';
+var P = new URLSearchParams(location.search), KOD = 'podglad1', $ = function (id) { return document.getElementById(id); };
+var tekst = null; try { tekst = P.get('przyklad') === '1' ? Karta.PRZYKLAD : localStorage.getItem('pzt-karta'); } catch (e) {}
+var w = tekst ? Karta.zTekstu(tekst) : null;
+if (!w || !w.gotowe) {
+  $('main').classList.add('hidden'); $('uw').classList.add('hidden'); document.querySelector('header').classList.add('hidden');
+  $('brak').innerHTML = '<b>' + (w ? 'W karcie są błędy.' : 'Nie ma jeszcze karty do pokazania.') + '</b><br>Wróć na <a href="./">stronę główną</a> i w kroku 3 wklej kartę albo wczytaj przykład.';
+  $('brak').classList.remove('hidden');
+  return;
+}
+$('tytul').textContent = '„' + w.dane.tytul + '”' + (P.get('przyklad') === '1' ? ' · przykład' : '');
+// każdy podgląd zaczyna od zera: stare wiadomości i odpowiedzi próbne są usuwane
+try {
+  ['prez-mock:' + Karta.PREFIKS + '-' + KOD + '-c', 'prez-mock:' + Karta.PREFIKS + '-' + KOD + '-a', 'pzt-klucz:' + KOD].forEach(function (k) { localStorage.removeItem(k); });
+  sessionStorage.removeItem('prez-' + Karta.PREFIKS + '-' + KOD);
+  localStorage.setItem('pzt-karta:' + KOD, tekst);
+} catch (e) {}
+var prez = $('prez'), tel = $('tel');
+addEventListener('message', function (e) {
+  if (e.origin !== location.origin || !e.data || e.data.pzt !== 'gotowe') return;
+  tel.src = e.data.adres;   // adres dla uczestnika razem z kluczem tej sesji próbnej
+});
+prez.src = 'sala/prowadzacy.html?karta=1&mock=1&s=' + KOD;
+function ster(co) { try { prez.contentWindow.postMessage({ pzt: co }, location.origin); } catch (e) {} }
+$('dalej').onclick = function () { ster('dalej'); this.blur(); };
+$('wstecz').onclick = function () { ster('wstecz'); this.blur(); };
+document.addEventListener('keydown', function (e) {
+  if (['ArrowRight', 'PageDown', ' ', 'Enter'].indexOf(e.key) >= 0) { e.preventDefault(); ster('dalej'); }
+  else if (['ArrowLeft', 'PageUp', 'Backspace'].indexOf(e.key) >= 0) { e.preventDefault(); ster('wstecz'); }
+});
+})();
+</script>
+</body>
+</html>

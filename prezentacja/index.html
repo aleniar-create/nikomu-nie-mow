@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Prezentacja z telefonami — zrób własną</title>
+<meta name="description" content="Prezentacja, w której sala decyduje telefonami. Działa z dowolnym czatem AI, bez konta i bez instalowania.">
+<style>
+:root{--bg:#fbfaf7;--card:#fff;--ink:#16181d;--ink2:#52514e;--muted:#6b6a66;--line:#e1e0d9;--acc:#2a78d6;--ok:#006300;--err:#b3261e;--warn:#8a5a00;--soft:#f3f6fb}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+body{padding:36px 20px 60px}
+.w{max-width:1120px;margin:0 auto}
+.kicker{font-size:14px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink2);font-weight:650}
+h1{font-size:40px;line-height:1.1;margin:8px 0 0;font-weight:720;letter-spacing:-.01em}
+.sub{font-size:20px;color:var(--ink2);margin:10px 0 0;max-width:780px}
+h2{font-size:24px;margin:0;font-weight:700}
+h3{font-size:19px;margin:26px 0 8px}
+p{margin:0 0 12px}
+a{color:var(--acc)}
+.box{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 26px 24px;margin-top:20px}
+.co{display:flex;gap:28px;align-items:flex-start}.co .tx{flex:1;font-size:17px}.co .ob{flex:none;display:flex;gap:10px;align-items:flex-end}
+.co img{border:1px solid var(--line);border-radius:10px;display:block}
+.siatka{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.krok{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:22px 26px 24px;margin-top:20px;min-width:0}
+.glowa{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.nr{flex:none;width:40px;height:40px;border-radius:50%;background:var(--ink);color:#fff;font-weight:720;font-size:20px;display:flex;align-items:center;justify-content:center}
+.krok p,.box p,.box li{font-size:16.5px;color:var(--ink2)}
+label{display:block;font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2);font-weight:650;margin:12px 0 5px}
+label .opc{text-transform:none;letter-spacing:0;font-weight:400;color:var(--muted)}
+input[type=text],input[type=number],select,textarea{width:100%;font:inherit;font-size:16.5px;color:var(--ink);background:#fff;border:1.5px solid var(--line);border-radius:10px;padding:9px 12px}
+textarea{min-height:74px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--acc);outline-offset:1px}
+.rzad{display:flex;gap:12px}.rzad>div{flex:1;min-width:0}
+.seg{display:flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg label{flex:1;margin:0;text-transform:none;letter-spacing:0;font-size:15.5px;font-weight:600;text-align:center;cursor:pointer;color:var(--ink2)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;padding:9px 6px}
+.seg input:checked+span{background:var(--ink);color:#fff}
+.seg input:focus-visible+span{outline:2px solid var(--acc);outline-offset:-3px}
+.seg small{display:block;font-weight:400;font-size:12.5px;opacity:.85}
+button{font:inherit;cursor:pointer}
+.btn{display:inline-block;background:var(--acc);color:#fff;font-weight:650;font-size:16.5px;border:0;border-radius:11px;padding:11px 18px;margin:4px 8px 4px 0;text-decoration:none}
+.btn.drugi{background:#fff;color:var(--ink);border:1.5px solid var(--line);padding:9.5px 16px}
+.btn.czarny{background:var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.maly{font-size:14.5px;color:var(--muted);margin-top:10px}
+.maly label{display:inline;text-transform:none;letter-spacing:0;font-size:14.5px;font-weight:400;color:var(--muted);margin:0;cursor:pointer}
+details{margin-top:12px}summary{cursor:pointer;font-size:15px;color:var(--ink2);font-weight:600}
+#karta{font:14px/1.5 ui-monospace,Menlo,Consolas,monospace;min-height:230px;white-space:pre;overflow:auto}
+#schowek{font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;min-height:180px;margin-top:12px;color:var(--ink2)}
+details.box{margin-top:20px}
+.lista{margin:12px 0 4px;padding:0;list-style:none;font-size:15.5px;line-height:1.45;max-height:300px;overflow:auto}
+.lista li{padding:2px 0 2px 26px;position:relative;color:var(--ink)}
+.lista li::before{position:absolute;left:2px;font-weight:720}
+.lista .ok{color:var(--ok)}.lista .ok::before{content:'✓'}
+.lista .blad{color:var(--err)}.lista .blad::before{content:'✗'}
+.lista .uwaga{color:var(--warn)}.lista .uwaga::before{content:'!'}
+.info{font-size:15px;color:var(--ok);font-weight:600;min-height:1.4em;margin-top:6px}
+.dwie{display:grid;grid-template-columns:1fr 1fr;gap:6px 36px}
+.box ol,.box ul{margin:0;padding-left:22px}.box li{margin:0 0 7px}
+.stopka{margin-top:26px;font-size:14.5px;color:var(--muted)}
+.hidden{display:none!important}
+@media (max-width:860px){.siatka,.dwie{grid-template-columns:1fr}.co{flex-direction:column}.co .ob{width:100%}.co .ob img{height:auto}.co .ob img:first-child{width:78%}.co .ob img:last-child{width:20%}h1{font-size:32px}body{padding:22px 14px 40px}.krok,.box{padding:18px 16px 20px}}
+</style>
+</head>
+<body>
+<div class="w">
+  <div class="kicker">Prezentacja z telefonami</div>
+  <h1>Zrób prezentację, w której sala decyduje</h1>
+  <p class="sub">Działa z dowolnym czatem AI, także darmowym. Bez konta, bez instalowania i bez własnej strony.</p>
+
+  <div class="box co">
+    <div class="tx">
+      <p><b>Co to jest.</b> Uczestnicy skanują kod QR i wcielają się w jedną rolę, na przykład psychologa szkolnego. W kilku scenach decydują telefonem, co zrobić w sprawie wymyślonego bohatera, i od razu widzą skutek swojej decyzji. Na dużym ekranie widać, jak wybrała sala, a potem ocenę każdej odpowiedzi według dwóch kryteriów, które ustalasz, np. „Zgodne z prawem?” i „Dobre dla ucznia?”. Na końcu każdy dostaje na telefonie własne zakończenie.</p>
+      <p><b>Co jest potrzebne.</b> Laptop z przeglądarką, rzutnik, internet i telefony uczestników. Odpowiedzi są anonimowe. Tę stronę najlepiej otworzyć na laptopie, z którego poprowadzisz zajęcia.</p>
+      <p><b>Jak powstaje treść.</b> Wymyślasz ją razem z czatem AI: ta strona daje gotowe instrukcje do wklejenia, a czat zadaje pytania z odpowiedziami do wyboru. Możesz też wpisać wszystko ręcznie.</p>
+      <a class="btn drugi" id="b-przyklad-podglad" href="podglad.html?przyklad=1" target="_blank" rel="noopener">Zobacz przykład</a>
+    </div>
+    <div class="ob"><img src="img/slajd.png" width="380" height="214" alt="Slajd z decyzją: scena, dwa fakty i licznik odpowiedzi"><img src="img/telefon.png" width="99" height="214" alt="Ekran telefonu: scena i cztery odpowiedzi"></div>
+  </div>
+
+  <div class="siatka">
+    <div class="krok">
+      <div class="glowa"><div class="nr">1</div><h2>Podstawy</h2></div>
+      <label for="f-temat">Temat</label><input type="text" id="f-temat" placeholder="np. Tajemnica zawodowa psychologa">
+      <label for="f-okazja">Przedmiot albo okazja <span class="opc">(opcjonalnie)</span></label><input type="text" id="f-okazja" placeholder="np. zaliczenie z elementów prawa">
+      <div class="rzad">
+        <div><label for="f-minuty">Ile minut</label><input type="number" id="f-minuty" min="5" max="180" value="20"></div>
+        <div><label for="f-prowadzacy">Ilu prowadzących</label><select id="f-prowadzacy"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></div>
+      </div>
+      <label for="f-sala">Kto będzie na sali i ile osób</label><input type="text" id="f-sala" placeholder="np. 15 studentów psychologii i prowadząca przedmiot">
+      <label for="f-autorzy">Imiona i nazwiska prowadzących <span class="opc">(na pierwszy slajd)</span></label><input type="text" id="f-autorzy">
+      <label for="f-ciekawi">Co cię w tym temacie ciekawi</label><textarea id="f-ciekawi" placeholder="Konkretny przypadek, spór, liczba, własne doświadczenie"></textarea>
+      <label for="f-wymagania">Wymagania osoby oceniającej <span class="opc">(opcjonalnie)</span></label><textarea id="f-wymagania" placeholder="Wklej wymagania z sylabusa albo wzór konspektu"></textarea>
+      <label>Ile pytań ma ci zadać czat</label>
+      <div class="seg">
+        <label><input type="radio" name="tryb" value="kilka" checked><span>Kilka<small>ok. 6–9</small></span></label>
+        <label><input type="radio" name="tryb" value="kilkanascie"><span>Kilkanaście<small>ok. 15–20</small></span></label>
+        <label><input type="radio" name="tryb" value="kilkadziesiat"><span>Kilkadziesiąt<small>ok. 30–50</small></span></label>
+      </div>
+    </div>
+
+    <div class="krok">
+      <div class="glowa"><div class="nr">2</div><h2>Rozmowa z twoim czatem</h2></div>
+      <p>Skopiuj instrukcję i wklej ją do czatu, którego używasz: ChatGPT, Gemini, Copilot, Claude albo innego. Czat zada ci pytania z gotowymi odpowiedziami. Odpowiadasz literami, np. „1b 2a 3c”, albo po swojemu.</p>
+      <p>Na końcu czat opisze pomysł na prezentację. Poprawiaj go w rozmowie, aż będzie ci pasował, i napisz „akceptuję”.</p>
+      <div><button class="btn" id="b-instrukcja">Skopiuj instrukcję</button><span id="czesci-rozmowa"></span></div>
+      <p class="maly">Czat od razu pisze całą prezentację, zamiast pytać? Napisz mu: „Zadawaj pytania po kolei, tak jak w instrukcji”.</p>
+      <div class="maly"><label><input type="checkbox" id="c-podziel"> Mój czat nie przyjmuje długich wiadomości (podziel instrukcje na części)</label><br>Części wklejaj po kolei. Po każdej, poza ostatnią, czat odpowie „OK”.</div>
+      <details>
+        <summary>Rozmowa się urwała albo chcesz dokończyć w innym czacie?</summary>
+        <p class="maly">Wklej tu pomysł, który zaakceptowałeś. Polecenie z kroku 3 zabierze go ze sobą, więc zadziała także w nowej rozmowie.</p>
+        <textarea id="pomysl" placeholder="Tytuł, rola sali, kryteria, sceny…"></textarea>
+      </details>
+      <div class="info" id="info-2"></div>
+    </div>
+
+    <div class="krok">
+      <div class="glowa"><div class="nr">3</div><h2>Karta prezentacji</h2></div>
+      <p>Wklej do tej samej rozmowy drugie polecenie. Czat zapisze prezentację jako kartę: zwykły tekst z etykietami, bez kodu. Skopiuj ją i wklej poniżej.</p>
+      <p>Jeśli czat przerwie i napisze KONTYNUACJA, odpisz „dalej” i doklej następną część pod poprzednią.</p>
+      <div><button class="btn" id="b-karta">Skopiuj polecenie „zapisz kartę”</button><span id="czesci-karta"></span></div>
+      <label for="karta">Karta</label>
+      <textarea id="karta" spellcheck="false" placeholder="TYTUŁ: …&#10;ROLA: …&#10;KRYTERIUM 1: …&#10;&#10;=== DECYZJA 1 ===&#10;…"></textarea>
+      <div><button class="btn drugi" id="b-przyklad">Wczytaj przykład</button><button class="btn drugi" id="b-plik">Wczytaj z pliku</button><input type="file" id="plik" accept=".txt,text/plain" class="hidden"></div>
+      <div class="info" id="info-3"></div>
+      <ul class="lista" id="wyniki"></ul>
+      <p class="maly" id="podp-uwagi">Czerwone linie trzeba poprawić, żółte warto przeczytać. Najprościej: skopiuj uwagi, wklej je do czatu i podmień kartę na poprawioną.</p>
+      <div><button class="btn drugi" id="b-uwagi" disabled>Skopiuj uwagi dla czatu</button></div>
+      <div id="sprawdzic-ramka" class="hidden"><h3>Sprawdź w źródłach przed zajęciami</h3><p class="maly" style="margin-top:0">Czat może się mylić. Tych rzeczy nie był pewien:</p><ul class="lista" id="sprawdzic"></ul></div>
+    </div>
+
+    <div class="krok">
+      <div class="glowa"><div class="nr">4</div><h2>Podgląd i start</h2></div>
+      <p id="stan">Wklej kartę w kroku 3. Gdy będzie bez błędów, odblokują się przyciski.</p>
+      <div><button class="btn drugi" id="b-podglad" disabled>Podgląd</button><button class="btn drugi" id="b-pobierz" disabled>Pobierz plik prezentacji</button><button class="btn drugi" id="b-skrypt" disabled>Skrypt dla prowadzących</button></div>
+      <div style="margin-top:6px"><button class="btn czarny" id="b-uruchom" disabled>Uruchom prezentację</button></div>
+      <p class="maly">Prezentacja jest zapisana w tej przeglądarce. Jeśli poprowadzisz zajęcia z innego komputera, pobierz plik i wczytaj go tam w kroku 3.</p>
+      <h3>W dniu zajęć</h3>
+      <ol style="margin:0;padding-left:22px;font-size:16px;color:var(--ink2)">
+        <li>Otwórz tę stronę na laptopie podłączonym do rzutnika i internetu.</li>
+        <li>Kliknij „Uruchom prezentację”. Klawisz F włącza pełny ekran.</li>
+        <li>Sala skanuje kod QR aparatem telefonu. Licznik pokazuje, ile osób dołączyło.</li>
+        <li>Slajdy przełączasz strzałką w prawo. Telefony zmieniają ekran same.</li>
+        <li>Nie zamykaj karty z prezentacją do końca zajęć. Odświeżenie strony niczego nie psuje.</li>
+      </ol>
+    </div>
+  </div>
+
+  <details class="box" id="schowek-ramka">
+    <summary>Ostatnio skopiowany tekst (gdyby wklejanie nie zadziałało, skopiuj go stąd ręcznie)</summary>
+    <textarea id="schowek" readonly aria-label="Ostatnio skopiowany tekst"></textarea>
+  </details>
+
+  <div class="box">
+    <h2>Gdy coś nie działa</h2>
+    <div class="dwie" style="margin-top:12px">
+      <ul>
+        <li><b>Telefon pokazuje „Brak kodu sesji”.</b> Zeskanuj kod QR z ekranu jeszcze raz.</li>
+        <li><b>Ekran na telefonie się nie zmienia.</b> Na laptopie naciśnij N i wybierz „Wyślij ekran ponownie do telefonów”. Uczestnik może też wybrać ekran sam, linkiem na dole telefonu.</li>
+      </ul>
+      <ul>
+        <li><b>Na telefonach napis „Ponawiam…” albo „Serwer jest zajęty”.</b> Odczekaj minutę. Część osób może przejść z Wi-Fi na dane komórkowe.</li>
+        <li><b>Nie ma internetu.</b> Poprowadź to samo bez telefonów: czytasz scenę i odpowiedzi, sala głosuje przez podniesienie ręki, a oceny omawiasz ze skryptu.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="box">
+    <h2>Warto wiedzieć</h2>
+    <div class="dwie" style="margin-top:12px">
+      <ul>
+        <li><b>Fakty sprawdzasz ty.</b> Czat może podać zmyślony przepis albo liczbę. Zanim coś trafi na slajd, sprawdź to w źródle.</li>
+        <li><b>Wielkość sali.</b> W jednej sieci Wi-Fi mieści się do ok. 25 telefonów. To rachunek z limitów darmowego serwisu ntfy.sh, a nie pomiar w sali. Przy większej grupie część osób powinna użyć danych komórkowych albo pracować w parach.</li>
+        <li><b>Czas.</b> Jedna decyzja zajmuje ok. 3 minut: scena, wybór, wyniki sali i omówienie.</li>
+      </ul>
+      <ul>
+        <li><b>Anonimowość.</b> Telefon dostaje losowy identyfikator ważny przez jedną sesję. W małej grupie wynik „1 osoba” przestaje być anonimowy, więc nie pytaj o sprawy osobiste.</li>
+        <li><b>Do czego to nie służy.</b> Do głosowań, od których coś zależy, ocen i list obecności: jedna osoba może wysłać więcej niż jedną odpowiedź.</li>
+        <li><b>Twoje dane.</b> Treść prezentacji zostaje w tej przeglądarce i w pliku, który pobierzesz. W trakcie zajęć ekrany i odpowiedzi przechodzą przez publiczny serwis ntfy.sh, więc nie wpisuj do karty niczego poufnego. Wyniki nie są nigdzie zapisywane.</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="stopka">Wersja 1.0 · 23.11.2026. Masz Claude z dostępem do plików? Jest też pełna wersja z dziewięcioma dodatkowymi wzorcami (typowanie liczby, praca w grupach, debata): <a href="pliki/Prezentacja_z_telefonami_PROMPT.md">instrukcja</a> i <a href="pliki/szablon-prezentacji-z-telefonami.zip">paczka z plikami</a>. Opis techniczny i kod: <a href="https://github.com/aleniar-create/nikomu-nie-mow/tree/main/prezentacja">GitHub</a>.</p>
+</div>
+
+<script src="sala/karta.js"></script>
+<script src="instrukcje.js"></script>
+<script>
+(function () {
+'use strict';
+var $ = function (id) { return document.getElementById(id); };
+var POLA = ['temat', 'okazja', 'minuty', 'prowadzacy', 'sala', 'autorzy', 'ciekawi', 'wymagania'];
+var P = new URLSearchParams(location.search), TEST = P.get('serwer') ? '&serwer=' + encodeURIComponent(P.get('serwer')) : '';
+function wez(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function zapisz(k, v) { try { localStorage.setItem(k, v); return true; } catch (e) { return false; } }
+
+// ---------- pamięć: wszystko, co wpiszesz, zostaje w tej przeglądarce ----------
+var stan = {}; try { stan = JSON.parse(wez('pzt-kreator') || '{}') || {}; } catch (e) {}
+POLA.forEach(function (p) { if (stan[p] !== undefined) $('f-' + p).value = stan[p]; });
+if (stan.tryb) Array.prototype.forEach.call(document.getElementsByName('tryb'), function (r) { r.checked = r.value === stan.tryb; });
+$('c-podziel').checked = !!stan.podziel; $('pomysl').value = stan.pomysl || ''; $('karta').value = wez('pzt-karta') || '';
+if ($('pomysl').value.trim()) $('pomysl').parentNode.open = true;
+function formularz() {
+  var f = { podziel: $('c-podziel').checked, pomysl: $('pomysl').value };
+  POLA.forEach(function (p) { f[p] = $('f-' + p).value; });
+  Array.prototype.forEach.call(document.getElementsByName('tryb'), function (r) { if (r.checked) f.tryb = r.value; });
+  return f;
+}
+function utrwal() { zapisz('pzt-kreator', JSON.stringify(formularz())); czesci(); }
+document.addEventListener('input', function (e) { if (e.target.id !== 'karta' && e.target.id !== 'schowek') utrwal(); });
+document.addEventListener('change', function (e) { if (e.target.id !== 'plik') utrwal(); });
+
+// ---------- kopiowanie: do schowka, a gdyby przeglądarka nie pozwoliła, tekst czeka w ramce do ręcznego skopiowania ----------
+function kopiuj(tekst, gdzie, opis) {
+  var s = $('schowek'); s.value = tekst;
+  function gotowe(ok) {
+    ['info-2', 'info-3'].forEach(function (id) { $(id).textContent = ''; });
+    gdzie.textContent = ok ? 'Skopiowano: ' + opis + '. Wklej to do czatu.' : 'Nie udało się skopiować. Tekst czeka w ramce pod krokami: zaznacz go i skopiuj ręcznie.';
+    if (!ok) { $('schowek-ramka').open = true; s.focus(); s.select(); }
+  }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(tekst).then(function () { gotowe(true); }, function () { gotowe(false); });
+  else { $('schowek-ramka').open = true; s.focus(); s.select(); var ok = false; try { ok = document.execCommand('copy'); } catch (e) {} gotowe(ok); }
+}
+function teksty() { var f = formularz(); return { rozmowa: Instrukcje.rozmowa(f), karta: Instrukcje.karta(f, f.pomysl) }; }
+// przy włączonym dzieleniu obok głównego przycisku pojawiają się przyciski kolejnych części
+function czesci() {
+  var t = teksty(), dziel = $('c-podziel').checked;
+  [['rozmowa', 'b-instrukcja', 'Skopiuj instrukcję', 'info-2'], ['karta', 'b-karta', 'Skopiuj polecenie „zapisz kartę”', 'info-3']].forEach(function (x) {
+    var cz = dziel ? Instrukcje.podziel(t[x[0]], 1800) : [t[x[0]]], el = $('czesci-' + x[0]); el.innerHTML = '';
+    $(x[1]).textContent = cz.length > 1 ? x[2] + ' — część 1 z ' + cz.length : x[2];
+    $(x[1]).onclick = function () { kopiuj(cz[0], $(x[3]), cz.length > 1 ? 'część 1 z ' + cz.length : 'całość'); };
+    cz.slice(1).forEach(function (c, i) {
+      var b = document.createElement('button'); b.className = 'btn drugi'; b.textContent = 'część ' + (i + 2);
+      b.onclick = function () { kopiuj(c, $(x[3]), 'część ' + (i + 2) + ' z ' + cz.length); }; el.appendChild(b);
+    });
+  });
+}
+
+// ---------- karta: sprawdzanie na bieżąco ----------
+var wynik = null, czek = null;
+function sprawdz() {
+  var tekst = $('karta').value; zapisz('pzt-karta', tekst);
+  var lista = $('wyniki'); lista.innerHTML = '';
+  if (!tekst.trim()) { wynik = null; przyciski(); $('sprawdzic-ramka').classList.add('hidden'); return; }
+  wynik = Karta.zTekstu(tekst);
+  function li(klasa, t) { var e = document.createElement('li'); e.className = klasa; e.textContent = t; lista.appendChild(e); }
+  var d = wynik.dane, n = d.decyzje.length;
+  if (wynik.gotowe) li('ok', 'Karta jest gotowa: ' + n + ' ' + (n === 1 ? 'decyzja' : n < 5 ? 'decyzje' : 'decyzji') + ', ok. ' + wynik.minuty + ' minut razem z dołączeniem telefonów i zakończeniem.');
+  wynik.uwagi.forEach(function (u) { li(u.p === 'blad' ? 'blad' : 'uwaga', u.t); });
+  var sp = $('sprawdzic'); sp.innerHTML = '';
+  d.sprawdzic.forEach(function (x) { var e = document.createElement('li'); e.className = 'uwaga'; e.textContent = x; sp.appendChild(e); });
+  $('sprawdzic-ramka').classList.toggle('hidden', !d.sprawdzic.length);
+  przyciski();
+}
+function przyciski() {
+  var jest = !!(wynik && wynik.gotowe), tekst = $('karta').value.trim();
+  ['b-podglad', 'b-skrypt', 'b-uruchom'].forEach(function (id) { $(id).disabled = !jest; });
+  $('b-pobierz').disabled = !tekst; $('b-uwagi').disabled = !(wynik && wynik.uwagi.length);
+  $('stan').textContent = jest ? 'Gotowe: „' + wynik.dane.tytul + '”. Obejrzyj podgląd, a potem uruchom prezentację.'
+    : tekst ? 'W karcie są błędy (czerwone linie w kroku 3). Popraw je, a przyciski się odblokują.' : 'Wklej kartę w kroku 3. Gdy będzie bez błędów, odblokują się przyciski.';
+}
+$('karta').addEventListener('input', function () { clearTimeout(czek); czek = setTimeout(sprawdz, 300); });
+$('b-przyklad').onclick = function () {
+  if ($('karta').value.trim() && !confirm('Zastąpić kartę przykładem? Obecna treść zniknie.')) return;
+  $('karta').value = Karta.PRZYKLAD; sprawdz();
+};
+$('b-plik').onclick = function () { $('plik').click(); };
+$('plik').addEventListener('change', function () {
+  var p = this.files && this.files[0]; if (!p) return;
+  var r = new FileReader(); r.onload = function () { $('karta').value = String(r.result || ''); sprawdz(); }; r.readAsText(p);
+  this.value = '';
+});
+$('b-uwagi').onclick = function () {
+  if (!wynik) return;
+  var bledy = wynik.uwagi.filter(function (u) { return u.p === 'blad'; }), lista = (bledy.length ? bledy : wynik.uwagi).map(function (u) { return u.t; });
+  kopiuj(Instrukcje.poprawki(lista, formularz().pomysl.trim() ? $('karta').value : ''), $('info-3'), 'uwagi do karty');
+};
+$('b-pobierz').onclick = function () {
+  var tytul = wynik && wynik.dane.tytul ? wynik.dane.tytul : 'prezentacja';
+  var nazwa = 'prezentacja-' + Karta.norm(tytul).toLowerCase().replace(/ /g, '-').slice(0, 40) + '.txt';
+  var a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([$('karta').value], { type: 'text/plain;charset=utf-8' })); a.download = nazwa;
+  document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+};
+$('b-podglad').onclick = function () { sprawdz(); window.open('podglad.html', '_blank'); };
+$('b-skrypt').onclick = function () { sprawdz(); window.open('skrypt.html', '_blank'); };
+$('b-uruchom').onclick = function () { sprawdz(); if (wynik && wynik.gotowe) window.open('sala/prowadzacy.html?karta=1' + TEST, '_blank'); };
+
+czesci(); sprawdz();
+window.Kreator = { formularz: formularz, teksty: teksty, sprawdz: sprawdz };
+})();
+</script>
+</body>
+</html>

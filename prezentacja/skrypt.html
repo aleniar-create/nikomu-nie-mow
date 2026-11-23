@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="pl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Skrypt dla prowadzących</title>
+<style>
+:root{--ink:#16181d;--ink2:#52514e;--line:#d9d8d0;--acc:#2a78d6;--soft:#f3f6fb}
+*{box-sizing:border-box}
+html,body{margin:0;background:#ecebe6;color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45;font-size:15px}
+.pasek{position:sticky;top:0;background:#fbfaf7;border-bottom:1px solid var(--line);padding:10px 18px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;z-index:2}
+.pasek button{font:inherit;font-weight:650;border-radius:10px;padding:8px 14px;border:1.5px solid var(--line);background:#fff;cursor:pointer}
+.pasek button.glowny{background:var(--acc);border-color:var(--acc);color:#fff}
+.pasek span{color:var(--ink2);font-size:14px}
+.kartka{max-width:820px;margin:18px auto 60px;background:#fff;padding:44px 52px;border:1px solid var(--line)}
+h1{font-size:28px;margin:0 0 4px}h2{font-size:19px;margin:28px 0 8px;border-bottom:2px solid var(--ink);padding-bottom:4px}
+.tyt{font-size:17px;color:var(--ink2);margin:0 0 12px}
+.mysl{border:1.5px solid var(--ink);border-radius:8px;padding:10px 14px;margin:10px 0}
+table{border-collapse:collapse;width:100%}td,th{border-bottom:1px solid var(--line);padding:5px 10px 5px 0;text-align:left;vertical-align:top}
+th{font-size:12px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink2)}
+.blok{border:1px solid var(--line);border-radius:8px;padding:12px 16px;margin:12px 0;break-inside:avoid}
+.blok h3{margin:0 0 6px;font-size:16.5px}.blok h3 small{font-weight:400;color:var(--ink2);font-size:14px}
+.w{display:flex;gap:10px;margin:5px 0}.w .e{flex:none;width:112px;font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--ink2);font-weight:650;padding-top:2px}.w .t{flex:1;min-width:0}
+.mow{font-size:16px}.czytaj{border-left:4px solid var(--ink);padding-left:10px;font-size:16px}
+.klik{font-weight:650}
+.planb{background:var(--soft);border-radius:6px;padding:8px 12px;margin-top:8px;font-size:14px}
+.zn{font-weight:650;white-space:nowrap}
+ul{margin:4px 0;padding-left:20px}li{margin:2px 0}
+.dop{color:var(--ink2);font-size:14px}
+@media print{html,body{background:#fff;font-size:11.5pt}.pasek{display:none}.kartka{margin:0;border:0;padding:0;max-width:none}@page{margin:16mm}}
+</style>
+</head>
+<body>
+<div class="pasek">
+  <button class="glowny" id="drukuj">Drukuj albo zapisz jako PDF</button>
+  <button id="kwestie">Skopiuj polecenie dla czatu: kwestie słowo w słowo</button>
+  <span id="info">Ten skrypt powstał z twojej karty. Czat może dopisać do niego pełne kwestie.</span>
+</div>
+<div class="kartka" id="kartka"></div>
+<script src="sala/karta.js"></script>
+<script src="instrukcje.js"></script>
+<script>
+(function () {
+'use strict';
+var $ = function (id) { return document.getElementById(id); }, esc = Karta.esc;
+var tekst = null, f = {}; try { tekst = localStorage.getItem('pzt-karta'); f = JSON.parse(localStorage.getItem('pzt-kreator') || '{}') || {}; } catch (e) {}
+var w = tekst ? Karta.zTekstu(tekst) : null;
+if (!w || !w.gotowe) { $('kartka').innerHTML = '<h1>Nie ma jeszcze gotowej karty</h1><p>Wróć na <a href="./">stronę główną</a> i w kroku 3 wklej kartę bez błędów.</p>'; document.querySelector('.pasek').style.display = 'none'; return; }
+var d = w.dane, N = d.decyzje.length, h = '', nr = 0;
+function znak(z) { return '<span class="zn">' + (z === 't' ? '✓ tak' : z === 'n' ? '✗ nie' : '? to zależy') + '</span>'; }
+function wiersz(e, t) { return '<div class="w"><div class="e">' + e + '</div><div class="t">' + t + '</div></div>'; }
+function mow(t) { return wiersz('Powiedz', '<div class="mow">' + t + '</div>'); }
+function klik(t) { return wiersz('Kliknij', '<span class="klik">→</span> ' + t); }
+function blok(tytul, czas, tresc) { nr++; return '<div class="blok"><h3>Slajd ' + nr + '. ' + esc(tytul) + ' <small>· ok. ' + czas + '</small></h3>' + tresc + '</div>'; }
+function linie(t) { return esc(t).replace(/\n/g, '<br>'); }
+
+h += '<h1>Skrypt dla prowadzących</h1><p class="tyt">' + esc(d.tytul) + (d.autorzy ? ' · ' + esc(d.autorzy) : '') + '</p>';
+if (d.mysl) h += '<div class="mysl"><b>Myśl przewodnia:</b> ' + esc(d.mysl) + '</div>';
+h += '<h2>Jak czytać ten skrypt</h2><ul><li><b>Powiedz</b>: to mówisz na głos. Sceny czytaj dokładnie, resztę możesz powiedzieć własnymi słowami.</li>' +
+  '<li><b>Kliknij →</b>: strzałka w prawo na laptopie. Telefony zmieniają ekran same.</li><li><b>Na telefonach</b>: co w tej chwili widzi sala.</li>' +
+  '<li>Wyniki z sali komentuj ostrożnie: „w tej sali wyszło…”, nie „ludzie uważają…”.</li></ul>';
+
+var plan = [['Dołączenie telefonów i zasady', 3]];
+if (d.przedpo) plan.push(['Pytanie na start', 1]);
+if (d.rola) plan.push(['Rola', 1]);
+d.decyzje.forEach(function (dec, i) { plan.push(['Decyzja ' + (i + 1) + ': ' + dec.nazwa, 3]); d.zwroty.forEach(function (z) { if (z.po === i + 1) plan.push(['Zwrot akcji: ' + z.tytul, 1]); }); });
+plan.push(['Epilog', 2]); if (d.przedpo) plan.push(['Pytanie na koniec i porównanie', 1]); plan.push(['Zakończenie', 1]);
+var suma = plan.reduce(function (a, p) { return a + p[1]; }, 0);
+h += '<h2>Plan czasu</h2><table><tr><th>Część</th><th>Minuty</th></tr>' + plan.map(function (p) { return '<tr><td>' + esc(p[0]) + '</td><td>' + p[1] + '</td></tr>'; }).join('') +
+  '<tr><td><b>Razem</b></td><td><b>ok. ' + suma + '</b></td></tr></table>' +
+  (Number(f.minuty) && suma > Number(f.minuty) ? '<p class="dop">Masz ' + Number(f.minuty) + ' minut, a plan daje ok. ' + suma + '. Gdy zabraknie czasu, pomiń jedną decyzję w całości zamiast skracać omówienia.</p>' : '<p class="dop">Gdy zabraknie czasu, pomiń jedną decyzję w całości zamiast skracać omówienia.</p>');
+h += '<h2>Przed zajęciami</h2><ul><li>Laptop podłączony do rzutnika i do internetu.</li><li>Strona prezentacji otwarta raz, przyciskiem „Uruchom prezentację”. Tej karty przeglądarki nie zamykaj.</li>' +
+  '<li>Pełny ekran: klawisz F. Kropka w prawym dolnym rogu ma być zielona.</li><li>Własny telefon skanuje kod QR i licznik pokazuje 1.</li>' +
+  (d.sprawdzic.length ? '<li>Fakty z listy „Do sprawdzenia” na końcu skryptu są sprawdzone w źródłach.</li>' : '') + '</ul>';
+
+h += '<h2>Przebieg</h2>';
+h += blok('Tytuł i kod QR', '2 min', wiersz('Na ekranie', 'Tytuł, kod QR i licznik „Dołączyło”.') + wiersz('Na telefonach', 'Po zeskanowaniu: „Jesteś z nami”.') +
+  mow(d.poczatek ? linie(d.poczatek) : '<span class="dop">Zacznij od sceny, pytania albo zaskakującego faktu, a nie od planu zajęć.</span>') +
+  mow('Wyjmijcie telefony i zeskanujcie kod aparatem. Niczego nie trzeba instalować, a odpowiedzi są anonimowe.') +
+  wiersz('Co robisz', 'Czekasz, aż licznik pokaże większość sali. Komu nie działa, siada z sąsiadem.') + klik('gdy sala dołączyła.'));
+h += blok('Zasady na dziś', '1 min', mow('Trzy zasady: odpowiedzi są anonimowe, każde pytanie można pominąć, a wyniki pokazujemy dla całej sali. Historia, którą zaraz poznacie, jest wymyślona, ale fakty i oceny mają źródła.') + klik('dalej.'));
+if (d.przedpo) h += blok('Pytanie na start', '1 min', wiersz('Na telefonach', esc(d.przedpo) + ' (' + d.przedpoLista.map(esc).join(' / ') + ')') +
+  mow('Na telefonach macie pierwsze pytanie. Odpowiedzcie tak, jak myślicie teraz. Wyniki zobaczymy na końcu.') + klik('gdy licznik pokaże większość sali.'));
+if (d.rola) h += blok('Rola', '1 min', wiersz('Na telefonach', 'Ten sam tekst roli.') + wiersz('Przeczytaj', '<div class="czytaj">' + linie(d.rola) + '</div>') + mow('Przed wami ' + N + ' ' + (N === 1 ? 'decyzja' : N < 5 ? 'decyzje' : 'decyzji') + '. Każdą podejmujecie sami, na telefonie.') + klik('dalej.'));
+d.decyzje.forEach(function (dec, i) {
+  h += blok('Decyzja ' + (i + 1) + ' z ' + N + ': ' + dec.nazwa, '3 min',
+    (dec.kiedy ? mow(esc(dec.kiedy) + '.') : '') +
+    wiersz('Przeczytaj', '<div class="czytaj">' + linie(dec.scena) + '</div><div class="dop">Dokładnie tak, bez komentarza i bez podpowiedzi.</div>') +
+    (dec.fakty.length ? mow('Zanim zdecydujecie: ' + dec.fakty.map(esc).join(' ')) : '') +
+    mow('Na telefonie macie odpowiedzi. Liczy się pierwsza. Macie ' + Karta.CZAS + ' sekund.') +
+    wiersz('Na telefonach', esc(dec.pytanie) + '<ul>' + dec.opcje.map(function (o) { return '<li><b>' + o.lit + '.</b> ' + esc(o.tekst) + '</li>'; }).join('') + '</ul>') +
+    klik('gdy odpowiedziała większość albo minęło ok. 45 sekund. Widać wybory sali.') +
+    mow('<span class="dop">Jedno zdanie o tym, co widać, jeszcze bez oceny. Zapytaj jedną osobę, dlaczego tak wybrała.</span>') +
+    klik('Widać tabelę ocen. Omów odpowiedzi po kolei:') +
+    '<table><tr><th>Odpowiedź</th><th>' + esc(d.k1) + '</th><th>' + esc(d.k2) + '</th><th>Dlaczego</th><th>Skutek na telefonie</th></tr>' +
+    dec.opcje.map(function (o) { return '<tr><td><b>' + o.lit + '.</b> ' + esc(o.skrot) + '</td><td>' + znak(o.oc[0]) + '</td><td>' + znak(o.oc[1]) + '</td><td>' + esc(o.dlaczego) + '</td><td>' + esc(o.skutek) + '</td></tr>'; }).join('') + '</table>' +
+    (dec.omowienie ? mow(linie(dec.omowienie)) : '') + klik('do następnej części.') +
+    '<div class="planb"><b>Plan B.</b> Nikt nie odpowiada: przeczytaj odpowiedzi na głos i poproś o podniesienie ręki. Brakuje czasu: pomiń wybory sali i pokaż od razu tabelę.</div>');
+  d.zwroty.forEach(function (z) { if (z.po === i + 1) h += blok('Zwrot akcji: ' + z.tytul, '1 min', wiersz('Przeczytaj', '<div class="czytaj">' + linie(z.tekst) + '</div>') + klik('dalej.')); });
+});
+h += blok('Epilog', '2 min', wiersz('Na telefonach', 'Własne zakończenie każdej osoby i ocena jej decyzji.') + mow('Każdy ma teraz na telefonie własne zakończenie: co wynikło z jego decyzji.') +
+  wiersz('Co robisz', 'Dajesz 15 sekund ciszy na przeczytanie.') + klik('Widać zakończenia całej sali.') +
+  wiersz('Zakończenia', '<ul><li>' + esc(d.epilog.dobre) + '</li><li>' + esc(d.epilog.mieszane) + '</li><li>' + esc(d.epilog.slabe) + '</li></ul>') +
+  (d.epilog.pytanie ? klik('Widać pytanie na koniec.') + wiersz('Przeczytaj', '<div class="czytaj">' + esc(d.epilog.pytanie) + '</div>') : '') + klik('dalej.'));
+if (d.przedpo) h += blok('Pytanie na koniec', '1 min', mow('To samo pytanie co na początku. Odpowiedzcie jeszcze raz.') + klik('gdy sala odpowiedziała. Widać porównanie.') +
+  mow('<span class="dop">Powiedz, co się zmieniło w tej sali, bez uogólniania.</span>') + klik('dalej.'));
+h += blok('Zakończenie', '1 min', wiersz('Na ekranie', (d.mysl ? 'Myśl przewodnia' : 'Podziękowanie') + (d.zrodla.length ? ' i źródła.' : '.')) + wiersz('Na telefonach', 'Karta na wynos.') +
+  mow(d.koniec || d.epilog.koniec ? linie(d.koniec || d.epilog.koniec) : (d.mysl ? esc(d.mysl) + ' ' : '') + '<span class="dop">Powiedz, co z tego wynika dla sali. Nie streszczaj zajęć i nie kończ pytaniami z sali.</span>'));
+
+if (d.sprawdzic.length) h += '<h2>Do sprawdzenia przed zajęciami</h2><p class="dop">Czat nie był pewien tych rzeczy. Sprawdź je w źródłach i popraw kartę, jeśli trzeba.</p><ul>' + d.sprawdzic.map(function (x) { return '<li>☐ ' + esc(x) + '</li>'; }).join('') + '</ul>';
+if (d.zrodla.length) h += '<h2>Źródła</h2><ul>' + d.zrodla.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
+h += '<h2>Gdy coś idzie nie tak</h2><table><tr><th>Objaw</th><th>Co zrobić</th></tr>' +
+  '<tr><td>Telefon pokazuje „Brak kodu sesji”</td><td>Zeskanować kod QR jeszcze raz.</td></tr>' +
+  '<tr><td>Ekran na telefonach się nie zmienia</td><td>Klawisz N, potem „Wyślij ekran ponownie do telefonów”. Uczestnik może wybrać ekran sam, linkiem na dole telefonu.</td></tr>' +
+  '<tr><td>Na telefonach „Ponawiam…” albo „Serwer jest zajęty”</td><td>Odczekać minutę. Część osób przechodzi z Wi-Fi na dane komórkowe.</td></tr>' +
+  '<tr><td>Nie ma internetu</td><td>Prowadzisz z tego skryptu bez telefonów: czytasz scenę i odpowiedzi, sala głosuje przez podniesienie ręki, oceny omawiasz z tabel.</td></tr></table>';
+$('kartka').innerHTML = h;
+document.title = 'Skrypt: ' + d.tytul;
+$('drukuj').onclick = function () { window.print(); };
+$('kwestie').onclick = function () {
+  var t = Instrukcje.skrypt(f, tekst), info = $('info');
+  function gotowe(ok) { info.textContent = ok ? 'Skopiowano polecenie razem z kartą. Wklej je do czatu.' : 'Nie udało się skopiować. Otwórz stronę główną i spróbuj w innej przeglądarce.'; }
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(function () { gotowe(true); }, function () { gotowe(false); }); else gotowe(false);
+};
+})();
+</script>
+</body>
+</html>
