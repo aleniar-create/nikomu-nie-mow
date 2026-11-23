@@ -295,11 +295,11 @@ footer{margin-top:28px;font-size:14px;color:var(--ink2)}
       return '<div class="card"><span class="tag">Krąg A</span><h2>Zwykła rozmowa</h2>' +
         '<p>Rozmawiajcie tak, jak zwykle rozmawiacie w grupie: możecie dopytywać, komentować, doradzać i dzielić się opiniami.</p>' +
         '<p><b>Temat:</b> ' + esc(TOPIC_TXT) + '</p><p class="small">Pytania na start:</p>' + qs +
-        '<p class="small">Czas: ok. 12 minut.</p></div>';
+        '<p class="small">Czas: ok. 8 minut.</p></div>';
     }
     return '<div class="card"><span class="tag">Krąg B</span><h2>Format mityngu</h2>' + rules +
       '<p><b>Temat:</b> ' + esc(TOPIC_TXT) + '</p><p class="small">Trzy pytania:</p>' + qs +
-      '<p class="small">Czas: ok. 12 minut.</p>' +
+      '<p class="small">Czas: ok. 8 minut.</p>' +
       '<button class="opt" id="lead" style="width:100%;margin-top:6px">Prowadzę ten krąg — pokaż kartę prowadzącego</button>' +
       '<div id="leadCard" class="hidden"><h2>Karta prowadzącego</h2><ol class="script">' +
       '<li>Przywitaj krąg i powiedz, że ten krąg działa jak mityng.</li>' +
@@ -408,9 +408,8 @@ footer{margin-top:28px;font-size:14px;color:var(--ink2)}
       $('#dc').innerHTML = '<div class="card"><h2>Wasze argumenty i dowody</h2>' + ev +
         '<p class="small">Możecie dodać własne argumenty — z doświadczenia, z innych zajęć, z eseju.</p></div>' +
         '<div class="card"><h2>Przebieg</h2><ol class="script">' +
-        '<li>3 min — przygotowanie w drużynie, wybierzcie mówcę.</li>' +
-        '<li>2 min — mowa drużyny Za.</li><li>2 min — mowa drużyny Przeciw.</li>' +
-        '<li>1 min — riposta Za.</li><li>1 min — riposta Przeciw.</li>' +
+        '<li>2 min — przeczytajcie karty, wybierzcie mówcę.</li>' +
+        '<li>1 min — mowa drużyny Za.</li><li>1 min — mowa drużyny Przeciw.</li>' +
         '<li>Głosowanie na telefonach.</li></ol></div>';
     }
     choiceGroup('.opts .opt', S.side, function (v) { S.side = v; save(); show(v); });

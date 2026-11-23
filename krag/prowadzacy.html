@@ -400,12 +400,12 @@ const SLIDES = [
       <div class="col card"><span class="tag">Krąg B</span><h3>Format mityngu</h3><p>Mówisz o sobie, bez komentarzy i rad. Prowadzi ochotnik z kartą w telefonie.</p></div>
     </div>
     <div class="body" style="margin-top:36px">Temat: <b>${TOPIC_TXT}</b></div>
-    <div class="foot">12 minut · obserwuję oba kręgi · na telefonie wybierz swój krąg.</div>` },
+    <div class="foot">8 minut · obserwujemy oba kręgi · na telefonie wybierz swój krąg.</div>` },
 
-  { id: 'kregi-czas', phase: 'kregi', timer: 720, html: () => `
+  { id: 'kregi-czas', phase: 'kregi', timer: 480, html: () => `
     <div class="kicker">Kręgi</div>
     <div class="row" style="flex:1;align-items:center">
-      <div style="flex:none;width:640px"><div class="timer" id="timer">12:00</div><div class="hint">T albo kliknięcie — start / pauza</div></div>
+      <div style="flex:none;width:640px"><div class="timer" id="timer">8:00</div><div class="hint">T albo kliknięcie — start / pauza</div></div>
       <div class="col">
         <div class="body" style="margin-top:0">Temat: <b>${TOPIC_TXT}</b></div>
         <ol class="rules" style="font-size:34px">${THREE_Q.map(q => '<li>' + q + '</li>').join('')}</ol>
@@ -460,14 +460,14 @@ const SLIDES = [
       <li>Wymyślcie zasadę, która go rozwiąże — w 1–2 zdaniach.</li>
       <li>Wyślijcie ją na ekran. Potem porównamy ją z rozwiązaniem AA i NA.</li>
     </ul>
-    <div class="foot">10 minut · szybsze zespoły biorą karty zapasowe.</div>` },
+    <div class="foot">7 minut · szybsze zespoły biorą karty zapasowe.</div>` },
 
-  { id: 'kryzysy-czas', phase: 'kryzysy', timer: 600, live: true, html: () => {
+  { id: 'kryzysy-czas', phase: 'kryzysy', timer: 420, live: true, html: () => {
     const sent = {}; answers('kryzys').forEach(e => { if (e.v && e.v.card) sent[e.v.card] = 1; });
     return `
     <div class="kicker">Kryzysy w grupie</div>
     <div class="row" style="flex:1;align-items:center">
-      <div style="flex:none;width:640px"><div class="timer" id="timer">10:00</div><div class="hint">T albo kliknięcie — start / pauza</div></div>
+      <div style="flex:none;width:640px"><div class="timer" id="timer">7:00</div><div class="hint">T albo kliknięcie — start / pauza</div></div>
       <div class="col">
         <div style="font-size:28px;color:var(--ink2);margin-bottom:14px">Wysłane zasady</div>
         ${CRISES.map(c => '<div style="font-size:32px;margin:8px 0">' + (sent[c.k] ? '✓ ' : '<span class="dim">○ </span>') + esc(c.who + ': ' + c.t) + '</div>').join('')}
@@ -484,22 +484,21 @@ const SLIDES = [
     ${st >= 1 ? '<div class="box sol"><div class="lbl">Jak to rozwiązały AA i NA</div><div class="txt">' + esc(c.s) + '</div></div>' : ''}
     <div class="foot">Tradycje w omówieniu własnym, na podstawie: Dwanaście Kroków i Dwanaście Tradycji.</div>`; } })),
 
-  { id: 'debata', phase: 'debata', timer: 180, keys: { p: 180, P: 180, '3': 180, '2': 120, '1': 60 }, html: () => `
+  { id: 'debata', phase: 'debata', timer: 120, keys: { p: 120, P: 120, '2': 120, '1': 60 }, html: () => `
     <div class="kicker">Debata · telefon</div>
     <h1 class="q" style="font-size:50px">${MOTION}</h1>
     <div class="row" style="margin-top:30px;flex:1">
       <div class="col">
         <ol class="rules" style="font-size:32px;margin-top:6px">
-          <li>3 min — przygotowanie w drużynach</li>
-          <li>2 min — mowa drużyny Za</li>
-          <li>2 min — mowa drużyny Przeciw</li>
-          <li>1 min — riposta Za</li>
-          <li>1 min — riposta Przeciw</li>
+          <li>2 min — przeczytajcie karty na telefonie</li>
+          <li>1 min — mowa drużyny Za</li>
+          <li>1 min — mowa drużyny Przeciw</li>
+          <li>Głosowanie na telefonach</li>
         </ol>
       </div>
       <div style="flex:none;width:560px">
-        <div class="timer" id="timer" style="font-size:180px">3:00</div>
-        <div class="tbtns"><button data-t="180">3:00</button><button data-t="120">2:00</button><button data-t="60">1:00</button></div>
+        <div class="timer" id="timer" style="font-size:180px">2:00</div>
+        <div class="tbtns"><button data-t="120">2:00</button><button data-t="60">1:00</button></div>
         <div class="hint">Przycisk ustawia i uruchamia czas · T — start / pauza</div>
       </div>
     </div>
