@@ -1,0 +1,84 @@
+<!doctype html><html lang="pl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><link rel="icon" href="data:,">
+<title>Nikomu nie mów — pokaz</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jersey+10&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+#scena{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform:translate(-50%,-50%) scale(var(--s,1));background:#0e1014;overflow:hidden;font-family:"Jersey 10","VT323",monospace;color:#e4dfc8;cursor:default}
+#slajd{position:absolute;inset:0;width:1920px;height:1080px;display:block}
+#wyniki{position:absolute;inset:0;width:1920px;height:1080px;border:0;background:#0e1014;visibility:hidden}
+#scena.w #wyniki{visibility:visible}#scena.w #slajd{visibility:hidden}
+#oslona{position:absolute;inset:0}                                   /* ramka z wynikami nie przejmuje klawiszy ani kliknięć */
+#qr{position:absolute;left:1425px;top:24px;width:176px;height:176px;image-rendering:pixelated;display:none}
+#scena.maly #qr{display:block}
+#scena.duzy #qr{display:block;left:1170px;top:var(--qt);width:468px;height:468px}
+#adres{position:absolute;left:1164px;top:calc(var(--qt) + 474px);width:756px;height:60px;background:#0f1116;font-size:40px;line-height:56px;padding-left:6px;box-sizing:border-box;display:none;white-space:nowrap}
+#scena.duzy #adres{display:block}
+#pasek{position:absolute;background:#12141a;display:none;right:0}
+#sek{position:absolute;display:none;font-size:56px;line-height:56px;text-align:right;width:160px;background:#12141a}
+#scena.czas #pasek,#scena.czas #sek{display:block}
+#ile{position:absolute;left:1662px;top:870px;width:250px;font-size:46px;line-height:50px;color:#e4dfc8;display:none}
+#scena.start #ile{display:block}
+#stan{position:absolute;right:10px;bottom:6px;font:700 15px/1 "Courier Prime",monospace;color:#8f9aa8;opacity:.75}
+#stan.zle{color:#fff;background:#b3261e;opacity:1;padding:6px 10px;font-size:20px}
+#pomoc{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#14171f;border:6px solid #3b4658;padding:36px 48px;font-size:44px;line-height:54px;display:none;z-index:9}
+#pomoc.o{display:block}#pomoc b{color:#e8a33d;font-weight:400}
+</style></head><body>
+<div id="scena"><img id="slajd" alt=""><iframe id="wyniki" title="Wyniki sali" tabindex="-1"></iframe><div id="oslona"></div>
+<img id="qr" alt="Kod QR do gry"><div id="adres"></div><div id="pasek"></div><div id="sek"></div><div id="ile"></div><div id="stan"></div>
+<div id="pomoc"><b>→ / spacja / pilot</b> następny krok<br><b>←</b> poprzedni krok<br><b>F</b> pełny ekran<br><b>T</b> pasek 30 sekund od nowa<br><b>?</b> ta pomoc</div></div>
+<script>
+const P={"url": "https://ntfy.sh/", "temat": "nnm-hg3sjyf6a4", "kroki": [{"s": 1, "l": 1, "r": "tytul"}, {"s": 2, "l": 1, "r": "scena"}, {"s": 3, "l": 1, "r": "fakty"}, {"s": 4, "l": 3, "r": "wybor"}, {"w": 1, "l": 3, "o": "Wyniki sali: decyzja 1"}, {"s": 5, "l": 4, "r": "omow"}, {"s": 6, "l": 4, "r": "scena"}, {"s": 7, "l": 4, "r": "fakty"}, {"s": 8, "l": 6, "r": "wybor"}, {"w": 2, "l": 6, "o": "Wyniki sali: decyzja 2"}, {"s": 9, "l": 7, "r": "omow"}, {"s": 10, "l": 7, "r": "sroda"}, {"s": 11, "l": 8, "r": "sroda"}, {"s": 12, "l": 8, "r": "scena"}, {"s": 13, "l": 8, "r": "fakty"}, {"s": 14, "l": 10, "r": "wybor"}, {"w": 3, "l": 10, "o": "Wyniki sali: decyzja 3"}, {"s": 15, "l": 11, "r": "omow"}, {"s": 16, "l": 11, "r": "scena"}, {"s": 17, "l": 11, "r": "fakty"}, {"s": 18, "l": 13, "r": "wybor"}, {"w": 4, "l": 13, "o": "Wyniki sali: decyzja 4"}, {"s": 19, "l": 14, "r": "omow"}, {"s": 20, "l": 14, "r": "scena"}, {"s": 21, "l": 14, "r": "fakty"}, {"s": 22, "l": 16, "r": "wybor"}, {"w": 5, "l": 16, "o": "Wyniki sali: decyzja 5"}, {"s": 23, "l": 17, "r": "omow"}, {"w": 6, "l": 17, "o": "Wyniki sali: cały tydzień"}, {"s": 24, "l": 17, "r": "epilog"}, {"s": 25, "l": 17, "r": "epilog"}, {"s": 26, "l": 17, "r": "final"}, {"s": 27, "l": 17, "r": "bib"}, {"s": 28, "l": 17, "r": "bib"}, {"s": 29, "l": 17, "r": "bib"}], "qr": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAApAAAAKQCAIAAACn190HAAALUklEQVR42u3dwbHTQBBF0SfKEbEjEKIkELQiBW0UCDv2+sXY3dPnBEDJY33fGjbvuK8zAEBt3xwBAAg2ACDYACDYAIBgAwCCDQCCDQAINgAg2AAg2ACAYAOAYAMAgg0ACDYACDYAINgAgGADgGADAIINAAg2AAg2ACDYACDYAIBgAwCCDQCCDQAINgAg2AAg2ACAYAOAYAMAgg0ACDYACDYAINgAgGADgGADAIINAAg2AAg2ACDYACDYAIBgAwCCDQCCDQAINgAg2AAg2ACAYAOAYAMAgg0ACDYACDYAINgAgGADgGADAIINAAg2AAg2ACDYACDYAIBgAwCCDQB7eXX/AN9//PQt/kd/fv/yPmx8nt3/Xlaf59PzqfY87P375oYNAIINAAg2AAg2ACDYAIBgA4BgAwCCDQAINgAINgAg2AAg2ACAYAMAgg0Agg0AxB527KHGnu4Hnv/p+/D0eao9vz3vvX8f/L65YQMAgg0ACDYACDYAINgAgGADgGADAIINAIINAAg2ACDYACDYAIBgAwCCDQCCDQDEHnbsrc7bJ4595Vbns3pffNr5+H3DDRsABBsAEGwAEGwAQLABAMEGAMEGAAQbABBsABBsAECwAUCwHQEACDYAINgAINgAQOxhQ7rtK3ffe662N7z6eZ6ef/d9btywAQDBBgAEGwAEGwAQbABAsAFAsAEAwQYAwQYABBsAEGwAEGwAQLABAMEGAMEGAGIPm4Ge7hOv3quu9jzV9qS7P0+1zwtu2AAg2ACAYAOAYAMAgg0ACDYACDYAINgAgGADgGADAIINAILtCABAsAEAwQYAwQYAYg+7BXu3e59/tf3sFNuHrrZv7e/d53XDBgAEGwAQbAAQbABAsAEAwQYAwQYABBsAEGwAEGwAQLABQLABAMEGAAQbAAQbAIg97Deotr8b+9Yf3Xue9u9X29v2/vh9ww0bAAQbABBsAECwAUCwAQDBBgDBBgAEGwAQbAAQbABAsAEAwQYAwQYABBsAEGwAaOG4r9MpkKp7ydX2hrufp735vd8f3LABAMEGAAQbAAQbABBsAECwAUCwAQDBBgDBBgAEGwAQbAAQbABAsAEAwQYAwQYAFnnFHvPW+75ZvAc8bX962t9L9/fz6eddfT5+f+yRu2EDgGADAIINAAg2AAg2ACDYAIBgA4BgAwCCDQCCDQAINgAg2AAg2ACAYAMAgg0AsYcd+6k+bzbfR489eDZ6f7q/D9P+3t2wAUCwAQDBBgDBBgAEGwAQbAAQbABAsAEAwQYAwQYABBsABBsAEGwAQLABQLABgNjDzrv2UFNs7/bp81f7vKv3aFc/T7U93e770933las9f7X3bdrfoxs2ACDYACDYAIBgAwCCDQCCDQAINgAINgAg2ACAYAOAYAMAgg0ACDYACDYAINgAwD/HfZ2xhx37uL7fEfvW3d+fafvZ9te9/27YACDYAIBgA4BgAwCCDQAINgAINgAg2ACAYAOAYAMAgg0Agu0IAECwAQDBBgDBBgCKeE37wN33rbs/z+o92mrPP20vufv32/18/N66YQMAgg0ACDYACDYAINgAgGADgGADAIINAIINAAg2ACDYACDYAIBgAwCCDQCCDQDEHnbsudq39v3O3keftpfcfa8dN2wAEGwAQLABAMEGAMEGAAQbABBsABBsAECwAUCwAQDBBgAEGwAEGwAQbABAsAEg9rBjX7bD81T7vNP2oZ2P93OnPelq59/9fXDDBgDBBgAEGwAQbAAQbABAsAFAsAEAwQYABBsABBsAEGwAQLABQLABAMEGAAQbAGIPO1P3XFfvAVf7vNX2faft43bfU7efbZ/b9+WGDQCCDQAINgAg2AAg2ACAYAOAYAMAgg0ACDYACDYAINgAgGADgGADAIINAAg2AMQeduynZvO95Gr73933g6vtl1f7+6r2PNXeh+7v57T32Q0bAOK/xAEAwQYABBsABBsAEGwAEGwAQLABAMEGAMEGAAQbABBsABBsAECwAQDBBoDYw4492nTcD+6+V21Pt9ffV/f3v9p+ub1tN2wAQLABAMEGAMEGAAQbABBsABBsAECwAUCwAQDBBgAEGwAEGwAQbABAsAFAsAGARY77Op1C7EOn6L5vtX3caXvn3d+HafvW3jc3bABAsAEAwQYAwQYABBsAEGwAEGwAQLABQLABAMEGAAQbAAQbABBsAECwAUCwAYBFXrFvnU57sfatYy+88N+LPem9f0+6//vdf3/csAFAsAEAwQYAwQYABBsAEGwAEGwAQLABAMEGAMEGAAQbAAQbABBsAECwAUCwAYDYw87U/ePVe7fd95W7792u3pPuvkfefZ942j539z1vN2wAQLABAMEGAMEGAAQbAAQbABBsAECwAUCwAQDBBgAEGwAEGwAQbAAQbABAsAGALzvu64w92tj3LbpXPe15qr1vPq/n2en3qvv5uGEDgGADAIINAIINAAg2ACDYACDYAIBgAwCCDQCCDQAINgAINgAg2ACAYAOAYAMAH/Sa9oG77x/HvjWFv1+fN/bONzofN2wAQLABQLABAMEGAAQbAAQbABBsABBsAECwAQDBBgDBBgAEGwAQbAAQbABAsAGAjN3DzrD94+57utX2tqudZ/e96u57xtP2uWPf2g0bABBsABBsAECwAQDBBgDBBgAEGwAEGwAQbABAsAFAsAEAwQYABBsABBsAEGwAmOq4rzP2ofvs42bY3m3377fa57VXjT14N2wAQLABQLABAMEGAAQbAAQbABBsAECwAUCwAQDBBgAEGwAEGwAQbAAQbABAsAGAL3jFPuvWzxN7w62ev/t+drXzsd/82e/XvrsbNgDEf4kDAIINAAg2AAg2ACDYAIBgA4BgAwCCDQCCDQAINgAg2AAg2ACAYAMAgg0AsYcde8YbWr033H1/t9r7aQ/eXvtOe8/TPq8bNgAINgAg2ACAYAOAYAMAgg0Agg0ACDYAINgAINgAgGADAIINAIINAAg2ACDYABB72Nll7zn2wrfen662V736+avtnVfbU/d75fzdsAEAwQYAwQYABBsAEGwAEGwAQLABAMEGAMEGAAQbAAQbABBsAECwAUCwAQDBBgBiDzv991+n7XlXO5/ue9vV9s6n/fv2vHu9n27YAIBgA4BgAwCCDQAINgAINgAg2AAg2ACAYAMAgg0Agg0ACDYAINgAINgAgGADALGHTeyLO898eB/a/rE9ab8PbtgAINgAgGADAIINAIINAAg2AAg2ACDYAIBgA4BgAwCCDQAINgAINgAg2ACAYANA7GFDau8Tr94D7r7fPO18pu1DV/u+uu+Xu2EDAIINAIINAAg2AAg2ACDYAIBgA4BgAwCCDQAINgAINgAg2AAg2ACAYAMAgg0AsYcd+83Yb16/T1zt81Y7n2r70Bm2b919X9wNGwAQbABAsAFAsAEAwQYAwQYABBsAEGwAEGwAQLABAMEGAMEGAAQbAAQbABBsACD2sNNzz9h5Zut93Gl74av3mFf/+933qrvvT9vPdsMGAMEGAAQbABBsABBsAECwAUCwAQDBBgAEGwAEGwAQbABAsAFAsAEAwQYAwQYAyjru63QKAOCGDQAINgAINgAg2ACAYAOAYAMAgg0ACDYACDYAINgAINgAgGADAIINAIINAAg2ACDYACDYAIBgA4BgAwCCDQAINgAINgAg2ACAYAOAYAMAgg0ACDYACDYAINgAINgAgGADAIINAIINAAg2ACDYACDYAIBgA4BgAwCCDQAINgAINgAg2ACAYAOAYAMAgg0ACDYACDYAINgAINgAgGADAIINAIINAAg2ACDYACDYAIBgA4BgOwIAEGwAQLABQLABAMEGAAQbAAQbAHinvy7e5P1iBvevAAAAAElFTkSuQmCC", "adres": "aleniar-create.github.io/nikomu-nie-mow/gra", "pasek": [96, 888, 1608, 36]};
+const QS=new URLSearchParams(location.search), MOCK=QS.get('mock')==='1', KANAL=/^[a-z0-9]{3,12}$/.test(QS.get('kanal')||'')?QS.get('kanal'):'';
+const TEMAT=P.temat+'-k'+(KANAL?'-'+KANAL:'');
+const $=id=>document.getElementById(id), scena=$('scena'), K=P.kroki;
+function skala(){document.documentElement.style.setProperty('--s',Math.min(innerWidth/1920,innerHeight/1080))}
+addEventListener('resize',skala);skala();
+$('qr').src=P.qr;$('adres').textContent=P.adres;
+$('wyniki').src='../wyniki/'+(MOCK?'?mock=1':KANAL?'?kanal='+KANAL:'');
+// obrazy slajdów wczytane z góry, żeby zmiana slajdu nie czekała na sieć
+const OBR={};K.forEach(k=>{if(k.s&&!OBR[k.s]){const i=new Image();i.src='s/'+String(k.s).padStart(2,'0')+'.png';OBR[k.s]=i}});
+
+/* ---------- sterowanie telefonami ---------- */
+let wyslany=null,wLocie=false,proby=0,zle=false;
+function nadaj(tresc){
+  if(MOCK){const w={id:Math.random().toString(36).slice(2),time:Math.floor(Date.now()/1000),event:'message',topic:TEMAT,message:tresc};let l=[];
+    try{l=JSON.parse(localStorage.getItem('nnm-mock:'+TEMAT)||'[]')}catch(e){}l.push(w);localStorage.setItem('nnm-mock:'+TEMAT,JSON.stringify(l));
+    try{const bc=new BroadcastChannel('nnm-mock');bc.postMessage(w);bc.close()}catch(e){}return Promise.resolve(w)}
+  return fetch(P.url+TEMAT,{method:'POST',body:tresc}).then(r=>{if(!r.ok)throw new Error('HTTP '+r.status);return r})}
+function steruj(){const l=K[krok].l;if(wLocie||wyslany===l)return;wLocie=true;
+  nadaj(JSON.stringify({t:'nnmk',s:l})).then(()=>{wyslany=l;proby=0;zle=false},()=>{proby++;zle=proby>=2})
+   .then(()=>{wLocie=false;rysujStan();if(wyslany!==K[krok].l)setTimeout(steruj,proby?Math.min(8000,1500*proby):0)})}
+function rysujStan(){const s=$('stan');s.className=zle?'zle':'';
+  s.textContent=zle?'Telefony nie dostają sygnału. Sprawdź internet w laptopie.':(krok+1)+'/'+K.length+(MOCK?' · tryb próbny':KANAL?' · kanał próbny: '+KANAL:'')}
+
+/* ---------- kroki ---------- */
+let krok=0,zegar=null;
+function czas(){clearInterval(zegar);const [x,y,w,h]=P.pasek,p=$('pasek'),s=$('sek'),t0=Date.now();
+  p.style.cssText=`left:auto;right:${1920-x-w}px;top:${y-6}px;height:${h+12}px;width:0px`;
+  s.style.cssText=`left:${x+w+8}px;top:${y-12}px`;
+  const tik=()=>{const t=Math.min(30,(Date.now()-t0)/1000);p.style.width=Math.round(w*t/30)+'px';s.textContent=Math.ceil(30-t)+' s';if(t>=30){clearInterval(zegar);s.textContent='0 s'}};
+  tik();zegar=setInterval(tik,200)}
+function licz(){try{const w=$('wyniki').contentWindow.__wyniki();const n=w&&(w.n!==undefined?w.n:(w.tel?w.tel.length:(w.telefony!==undefined?w.telefony:null)));
+  if(n!==null&&n!==undefined)$('ile').innerHTML='W grze:<br>'+n+(n===1?' telefon':(n%10>=2&&n%10<=4&&(n%100<12||n%100>14)?' telefony':' telefonów'))}catch(e){}}
+setInterval(()=>{if(K[krok].s===1)licz()},1000);
+function pokaz(){const k=K[krok];clearInterval(zegar);
+  scena.className=k.w!==undefined?'w':(k.r==='tytul'||k.r==='final'?'duzy'+(k.r==='tytul'?' start':''):(k.r==='bib'?'':'maly'+(k.r==='wybor'?' czas':'')));
+  if(k.w!==undefined){try{$('wyniki').contentWindow.idz(k.w)}catch(e){}}
+  else{$('slajd').src=OBR[k.s].src;scena.style.setProperty('--qt',(k.r==='final'?528:522)+'px');if(k.r==='wybor')czas()}
+  try{history.replaceState(null,'','#'+(krok+1))}catch(e){}
+  rysujStan();steruj()}
+function idz(n){n=Math.max(0,Math.min(K.length-1,n));if(n===krok)return;krok=n;pokaz()}
+document.addEventListener('keydown',e=>{if(e.ctrlKey||e.metaKey||e.altKey)return;const k=e.key;
+  if(k==='ArrowRight'||k==='PageDown'||k===' '||k==='Enter'||k==='ArrowDown'){e.preventDefault();idz(krok+1)}
+  else if(k==='ArrowLeft'||k==='PageUp'||k==='ArrowUp'||k==='Backspace'){e.preventDefault();idz(krok-1)}
+  else if(k==='Home')idz(0);
+  else if(k==='f'||k==='F'){if(document.fullscreenElement)document.exitFullscreen();else document.documentElement.requestFullscreen().catch(()=>{})}
+  else if(k==='t'||k==='T'){if(K[krok].r==='wybor')czas()}
+  else if(k==='?'||k==='h'||k==='H')$('pomoc').classList.toggle('o');
+  else if(k==='Escape')$('pomoc').classList.remove('o')});
+scena.addEventListener('click',e=>{const r=scena.getBoundingClientRect();idz(krok+((e.clientX-r.left)<r.width*.25?-1:1))});
+$('wyniki').addEventListener('load',()=>{if(K[krok].w!==undefined){try{$('wyniki').contentWindow.idz(K[krok].w)}catch(e){}}});
+const h=/^#(\d+)$/.exec(location.hash);if(h)krok=Math.max(0,Math.min(K.length-1,Number(h[1])-1));
+pokaz();
+window.__pokaz=()=>({krok,k:K[krok],wyslany,zle});
+</script></body></html>
